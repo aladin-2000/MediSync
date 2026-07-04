@@ -1,0 +1,21 @@
+package com.project.medisync.modules.profils.repository;
+
+import com.project.medisync.modules.profils.entity.Laboratoire;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+@Repository
+public interface LaboratoireRepository extends JpaRepository<Laboratoire, UUID> {
+
+    Optional<Laboratoire> findByIdAndDeletedAtIsNull(UUID id);
+
+    List<Laboratoire> findAllByDeletedAtIsNull();
+
+    Optional<Laboratoire> findByUserIdAndDeletedAtIsNull(UUID userId);
+
+    boolean existsByUserIdAndDeletedAtIsNull(UUID userId);
+}
