@@ -14,25 +14,25 @@ import java.util.UUID;
 
 public interface CreneauRepository extends JpaRepository<Creneau, UUID> {
 
-    Optional<Creneau> findByIdAndDeletedAtIsNull(UUID id);
+    Optional<Creneau> findById(UUID id);
 
     /** Créneaux d'un médecin sur une période donnée. */
-    List<Creneau> findByMedecinIdAndDateBetweenAndDeletedAtIsNull(
+    List<Creneau> findByMedecinIdAndDateBetween(
             UUID medecinId, LocalDate dateDebut, LocalDate dateFin);
 
     /** Créneaux disponibles d'un médecin sur une période — utilisé pour les propositions de remplacement. */
-    List<Creneau> findByMedecinIdAndStatutAndDateBetweenAndDeletedAtIsNull(
+    List<Creneau> findByMedecinIdAndStatutAndDateBetween(
             UUID medecinId, StatutCreneauEnum statut, LocalDate dateDebut, LocalDate dateFin);
 
     /** Vérifie si un créneau existe déjà pour éviter les doublons lors de la génération automatique. */
-    boolean existsByMedecinIdAndDateAndHeureDebutAndDeletedAtIsNull(
+    boolean existsByMedecinIdAndDateAndHeureDebut(
             UUID medecinId, LocalDate date, java.time.LocalTime heureDebut);
 
     /**
      * Soft-delete en masse des créneaux DISPONIBLES futurs issus d'une règle de récurrence.
      * Appelé quand le médecin désactive ou supprime une DisponibiliteHebdomadaire.
      */
-    @Modifying
+/*    @Modifying
     @Query("""
             UPDATE Creneau c SET c.deletedAt = CURRENT_TIMESTAMP
             WHERE c.disponibiliteHebdoId = :disponibiliteHebdoId
@@ -43,5 +43,5 @@ public interface CreneauRepository extends JpaRepository<Creneau, UUID> {
     void softDeleteFutursDisponibles(
             @Param("disponibiliteHebdoId") UUID disponibiliteHebdoId,
             @Param("aujourdhui")           LocalDate aujourdhui
-    );
+    );*/
 }

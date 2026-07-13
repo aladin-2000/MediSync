@@ -45,14 +45,6 @@ public class Creneau {
     @Column(name = "medecin_id", nullable = false, columnDefinition = "VARCHAR(36)")
     private UUID medecinId;
 
-    /**
-     * Référence vers la règle de récurrence ayant généré ce créneau.
-     * Null si le créneau a été créé manuellement par le médecin.
-     * Permet de supprimer en masse les créneaux futurs si une règle est désactivée.
-     */
-    @Column(name = "disponibilite_hebdo_id", columnDefinition = "VARCHAR(36)")
-    private UUID disponibiliteHebdoId;
-
     @Column(name = "date", nullable = false)
     private LocalDate date;
 
@@ -69,7 +61,4 @@ public class Creneau {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    /** Soft delete. */
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
 }

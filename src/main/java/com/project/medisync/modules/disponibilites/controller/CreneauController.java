@@ -89,12 +89,12 @@ public class CreneauController {
     }
 
     /** DELETE /api/medecins/{medecinId}/creneaux/{id} */
-    @DeleteMapping("/{id}")
+    /*@DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> delete(
             @PathVariable UUID medecinId,
             @PathVariable UUID id) {
 
         creneauService.delete(id);
         return ResponseEntity.ok(ApiResponse.ok("Créneau supprimé.", null));
-    }
+    }*/
 }

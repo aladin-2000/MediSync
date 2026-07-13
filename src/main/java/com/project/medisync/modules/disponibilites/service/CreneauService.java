@@ -21,8 +21,6 @@ public interface CreneauService {
      *  Utilisé pour afficher les propositions de remplacement. */
     List<Creneau> getDisponiblesPourRemplacement(UUID medecinId);
 
-    /** Suppression d'un créneau DISPONIBLE uniquement. */
-    void delete(UUID id);
 
     /** Marquer un créneau comme réservé. */
     void marquerReserve(UUID id);
@@ -31,5 +29,5 @@ public interface CreneauService {
     void marquerDisponible(UUID id);
 
     /** Appelé par le job @Scheduled chaque vendredi soir. */
-    void genererCreneauxSemaineProchaine();
+  //  void genererCreneauxSemaineProchaine();
 }
