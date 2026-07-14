@@ -7,14 +7,13 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Repository
-public interface PaiementRepository extends JpaRepository<Paiement, UUID> {
+public interface PaiementRepository extends JpaRepository<Paiement, String> {
 
-    Optional<Paiement> findByIdAndDeletedAtIsNull(UUID id);
+    Optional<Paiement> findByIdAndDeletedAtIsNull(String id);
 
-    List<Paiement> findByLaboratoireIdAndDeletedAtIsNull(UUID laboratoireId);
+    List<Paiement> findByLaboratoireIdAndDeletedAtIsNull(String laboratoireId);
 
-    List<Paiement> findByLaboratoireIdAndStatutAndDeletedAtIsNull(UUID laboratoireId, StatutPaiementEnum statut);
+    List<Paiement> findByLaboratoireIdAndStatutAndDeletedAtIsNull(String laboratoireId, StatutPaiementEnum statut);
 }

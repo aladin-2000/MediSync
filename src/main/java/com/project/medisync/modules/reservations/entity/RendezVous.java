@@ -33,8 +33,8 @@ public class RendezVous {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id", updatable = false, nullable = false, columnDefinition = "VARCHAR(36)")
-    private UUID id;
+    @Column(name = "id", updatable = false, nullable = false, length = 36)
+    private String id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creneau_id", nullable = false)

@@ -4,23 +4,22 @@ import com.project.medisync.modules.reservations.entity.AnnuleParEnum;
 import com.project.medisync.modules.reservations.entity.RendezVous;
 import com.project.medisync.modules.reservations.entity.StatutRendezVousEnum;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 /**
  * Représente la réponse API contenant les détails d'un rendez-vous.
  */
 public record RendezVousResponse(
         /** Identifiant unique du rendez-vous. */
-        UUID id,
+        String id,
 
         /** Identifiant du créneau horaire associé. */
-        UUID creneauId,
+        String creneauId,
 
         /** Identifiant du délégué médical. */
-        UUID delegueId,
+        String delegueId,
 
         /** Identifiant du médecin. */
-        UUID medecinId,
+        String medecinId,
 
         /** Statut actuel du rendez-vous (CONFIRME, ANNULE, REALISE, ABSENT). */
         StatutRendezVousEnum statut,

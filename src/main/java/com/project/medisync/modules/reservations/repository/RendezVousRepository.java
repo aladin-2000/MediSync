@@ -9,19 +9,18 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Repository
-public interface RendezVousRepository extends JpaRepository<RendezVous, UUID> {
+public interface RendezVousRepository extends JpaRepository<RendezVous, String> {
 
-    Optional<RendezVous> findByIdAndDeletedAtIsNull(UUID id);
+    Optional<RendezVous> findByIdAndDeletedAtIsNull(String id);
 
-    List<RendezVous> findByDelegueIdAndDeletedAtIsNull(UUID delegueId);
+    List<RendezVous> findByDelegueIdAndDeletedAtIsNull(String delegueId);
 
-    List<RendezVous> findByMedecinIdAndDeletedAtIsNull(UUID medecinId);
+    List<RendezVous> findByMedecinIdAndDeletedAtIsNull(String medecinId);
 
     /** Vérifie qu'un créneau n'est pas déjà réservé. */
-    boolean existsByCreneauIdAndStatutNotAndDeletedAtIsNull(UUID creneauId, StatutRendezVousEnum statut);
+    boolean existsByCreneauIdAndStatutNotAndDeletedAtIsNull(String creneauId, StatutRendezVousEnum statut);
 
     /**
      * Vérifie le chevauchement horaire pour un délégué :
@@ -35,6 +34,6 @@ public interface RendezVousRepository extends JpaRepository<RendezVous, UUID> {
               AND r.statut <> 'ANNULE'
               AND r.deletedAt IS NULL
             """)
-    boolean existsByDelegueConflict(@Param("delegueId") UUID delegueId,
-                                    @Param("creneauId") UUID creneauId);
+    boolean existsByDelegueConflict(@Param("delegueId") String delegueId,
+                                    @Param("creneauId") String creneauId);
 }

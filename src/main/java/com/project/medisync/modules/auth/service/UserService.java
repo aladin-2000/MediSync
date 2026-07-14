@@ -3,7 +3,6 @@ package com.project.medisync.modules.auth.service;
 import com.project.medisync.modules.auth.entity.User;
 import com.project.medisync.modules.auth.entity.RoleEnum;
 
-import java.util.UUID;
 
 /**
  * Interface publique du module Auth.
@@ -12,16 +11,16 @@ import java.util.UUID;
  */
 public interface UserService {
 
-    User getById(UUID id);
+    User getById(String id);
 
     User getByEmail(String email);
 
     User save(User user);
 
-    boolean existsById(UUID id);
+    boolean existsById(String id);
 
     boolean existsByEmail(String email);
 
     /** Soft delete de l'utilisateur. */
-    void delete(UUID id);
+    void delete(String id);
 }

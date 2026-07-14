@@ -4,7 +4,6 @@ import com.project.medisync.modules.notifications.entity.Notification;
 import com.project.medisync.modules.notifications.entity.TypeNotificationEnum;
 
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Interface publique du module Notifications.
@@ -12,15 +11,15 @@ import java.util.UUID;
  */
 public interface NotificationService {
 
-    Notification envoyer(UUID userId, TypeNotificationEnum type, String contenu);
+    Notification envoyer(String userId, TypeNotificationEnum type, String contenu);
 
-    List<Notification> getByUser(UUID userId);
+    List<Notification> getByUser(String userId);
 
-    List<Notification> getNonLuesByUser(UUID userId);
+    List<Notification> getNonLuesByUser(String userId);
 
-    long countNonLues(UUID userId);
+    long countNonLues(String userId);
 
-    void marquerLue(UUID notificationId);
+    void marquerLue(String notificationId);
 
-    void marquerToutesLues(UUID userId);
+    void marquerToutesLues(String userId);
 }

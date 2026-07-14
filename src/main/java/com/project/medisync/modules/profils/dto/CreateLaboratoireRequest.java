@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -16,7 +15,7 @@ import java.util.UUID;
 public class CreateLaboratoireRequest {
 
     @NotNull(message = "L'identifiant utilisateur est obligatoire.")
-    private UUID userId;
+    private String userId;
 
     @NotBlank(message = "Le nom du laboratoire est obligatoire.")
     private String nom;

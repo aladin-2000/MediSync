@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Contrôleur REST gérant les opérations CRUD sur les profils des Délégués Médicaux
@@ -52,24 +51,24 @@ public class DelegueController {
     }
 
     /**
-     * Récupère un profil Délégué spécifique par son identifiant unique UUID.
+     * Récupère un profil Délégué spécifique par son identifiant unique String.
      *
-     * @param id L'identifiant unique UUID du délégué à récupérer
+     * @param id L'identifiant unique String du délégué à récupérer
      * @return Les détails du profil délégué trouvé
      */
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<DelegueResponse>> getById(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<DelegueResponse>> getById(@PathVariable String id) {
         return ResponseEntity.ok(ApiResponse.ok(DelegueResponse.from(delegueService.getById(id))));
     }
 
     /**
      * Récupère la liste des délégués médicaux rattachés à un laboratoire spécifique.
      *
-     * @param laboratoireId L'identifiant unique UUID du laboratoire cible
+     * @param laboratoireId L'identifiant unique String du laboratoire cible
      * @return La liste des délégués associés à ce laboratoire
      */
     @GetMapping("/laboratoire/{laboratoireId}")
-    public ResponseEntity<ApiResponse<List<DelegueResponse>>> getByLaboratoire(@PathVariable UUID laboratoireId) {
+    public ResponseEntity<ApiResponse<List<DelegueResponse>>> getByLaboratoire(@PathVariable String laboratoireId) {
         List<DelegueResponse> list = delegueService.getByLaboratoire(laboratoireId)
                 .stream().map(DelegueResponse::from).toList();
         return ResponseEntity.ok(ApiResponse.ok(list));
@@ -78,13 +77,13 @@ public class DelegueController {
     /**
      * Met à jour les informations du profil d'un délégué existant.
      *
-     * @param id L'identifiant unique UUID du délégué à modifier
+     * @param id L'identifiant unique String du délégué à modifier
      * @param req DTO contenant les nouvelles valeurs pour les informations du délégué
      * @return Les détails du profil délégué mis à jour
      */
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<DelegueResponse>> update(
-            @PathVariable UUID id,
+            @PathVariable String id,
             @Valid @RequestBody CreateDelegueRequest req) {
         var delegue = delegueService.update(id, req.getNom(), req.getPrenom(), req.getTelephone());
         return ResponseEntity.ok(ApiResponse.ok("Profil délégué mis à jour.", DelegueResponse.from(delegue)));
@@ -93,11 +92,11 @@ public class DelegueController {
     /**
      * Supprime de façon logique (soft delete) un délégué de la plateforme.
      *
-     * @param id L'identifiant unique UUID du délégué à soft-delete
+     * @param id L'identifiant unique String du délégué à soft-delete
      * @return Un message indiquant le succès de la suppression logique
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable String id) {
         delegueService.delete(id);
         return ResponseEntity.ok(ApiResponse.ok("Profil délégué supprimé.", null));
     }

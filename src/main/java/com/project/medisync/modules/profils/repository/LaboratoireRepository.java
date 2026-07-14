@@ -6,16 +6,15 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Repository
-public interface LaboratoireRepository extends JpaRepository<Laboratoire, UUID> {
+public interface LaboratoireRepository extends JpaRepository<Laboratoire, String> {
 
-    Optional<Laboratoire> findByIdAndDeletedAtIsNull(UUID id);
+    Optional<Laboratoire> findByIdAndDeletedAtIsNull(String id);
 
     List<Laboratoire> findAllByDeletedAtIsNull();
 
-    Optional<Laboratoire> findByUserIdAndDeletedAtIsNull(UUID userId);
+    Optional<Laboratoire> findByUserIdAndDeletedAtIsNull(String userId);
 
-    boolean existsByUserIdAndDeletedAtIsNull(UUID userId);
+    boolean existsByUserIdAndDeletedAtIsNull(String userId);
 }

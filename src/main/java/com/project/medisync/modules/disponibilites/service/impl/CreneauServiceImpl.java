@@ -18,7 +18,6 @@ import java.time.temporal.TemporalAdjusters;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -32,19 +31,7 @@ public class CreneauServiceImpl implements CreneauService {
 
     @Override
     @Transactional
-    public Creneau createManuel(UUID medecinId, LocalDate date, LocalTime heureDebut) {
-
-        medecinService.getById(medecinId);
-
-        // Max 1 semaine à l'avance
-        LocalDate limiteMax = LocalDate.now().plusWeeks(1);
-        if (date.isBefore(LocalDate.now())) {
-            throw new BusinessException("Impossible de créer un créneau dans le passé.");
-        }
-        if (date.isAfter(limiteMax)) {
-            throw new BusinessException(
-                    "La réservation est limitée à une semaine à l'avance. Date maximale : " + limiteMax + ".");
-        }
+    public Creneau createCreneau(String medecinId, LocalDate date, LocalTime heureDebut) {
 
         // Pas de doublon
         if (creneauRepo.existsByMedecinIdAndDateAndHeureDebut(medecinId, date, heureDebut)) {
@@ -56,7 +43,6 @@ public class CreneauServiceImpl implements CreneauService {
                 .medecinId(medecinId)
                 .date(date)
                 .heureDebut(heureDebut)
-                // disponibiliteHebdoId = null → créneau manuel
                 .build();
 
         Creneau saved = creneauRepo.save(creneau);
@@ -66,14 +52,14 @@ public class CreneauServiceImpl implements CreneauService {
 
     @Override
     @Transactional(readOnly = true)
-    public Creneau getById(UUID id) {
+    public Creneau getById(String id) {
         return creneauRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Créneau", id));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<Creneau> getBySemaine(UUID medecinId, LocalDate lundiDeLaSemaine) {
+    public List<Creneau> getBySemaine(String medecinId, LocalDate lundiDeLaSemaine) {
         LocalDate dimanche = lundiDeLaSemaine.plusDays(6);
         return creneauRepo.findByMedecinIdAndDateBetween(
                 medecinId, lundiDeLaSemaine, dimanche);
@@ -81,7 +67,7 @@ public class CreneauServiceImpl implements CreneauService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Creneau> getDisponiblesPourRemplacement(UUID medecinId) {
+    public List<Creneau> getDisponiblesPourRemplacement(String medecinId) {
         LocalDate debut = LocalDate.now();
         LocalDate fin   = LocalDate.now().plusWeeks(1);
         return creneauRepo.findByMedecinIdAndStatutAndDateBetween(
@@ -90,7 +76,7 @@ public class CreneauServiceImpl implements CreneauService {
 
     @Override
     @Transactional
-    public void marquerReserve(UUID id) {
+    public void marquerReserve(String id) {
         Creneau creneau = getById(id);
         creneau.setStatut(StatutCreneauEnum.RESERVE);
         creneauRepo.save(creneau);
@@ -99,7 +85,7 @@ public class CreneauServiceImpl implements CreneauService {
 
     @Override
     @Transactional
-    public void marquerDisponible(UUID id) {
+    public void marquerDisponible(String id) {
         Creneau creneau = getById(id);
         creneau.setStatut(StatutCreneauEnum.DISPONIBLE);
         creneauRepo.save(creneau);

@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -24,7 +23,7 @@ public class MedecinPrioritaireServiceImpl implements MedecinPrioritaireService 
 
     @Override
     @Transactional
-    public MedecinPrioritaire ajouter(UUID laboratoireId, UUID medecinId) {
+    public MedecinPrioritaire ajouter(String laboratoireId, String medecinId) {
         if (repository.existsByLaboratoireIdAndMedecinId(laboratoireId, medecinId)) {
             throw new BusinessException("Ce médecin est déjà dans la liste prioritaire de ce laboratoire.");
         }
@@ -36,13 +35,13 @@ public class MedecinPrioritaireServiceImpl implements MedecinPrioritaireService 
 
     @Override
     @Transactional(readOnly = true)
-    public List<MedecinPrioritaire> getByLaboratoire(UUID laboratoireId) {
+    public List<MedecinPrioritaire> getByLaboratoire(String laboratoireId) {
         return repository.findByLaboratoireId(laboratoireId);
     }
 
     @Override
     @Transactional
-    public void retirer(UUID laboratoireId, UUID medecinId) {
+    public void retirer(String laboratoireId, String medecinId) {
         MedecinPrioritaire entry = repository.findByLaboratoireIdAndMedecinId(laboratoireId, medecinId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Ce médecin n'est pas dans la liste prioritaire de ce laboratoire."));
@@ -51,7 +50,7 @@ public class MedecinPrioritaireServiceImpl implements MedecinPrioritaireService 
 
     @Override
     @Transactional(readOnly = true)
-    public boolean estPrioritaire(UUID laboratoireId, UUID medecinId) {
+    public boolean estPrioritaire(String laboratoireId, String medecinId) {
         return repository.existsByLaboratoireIdAndMedecinId(laboratoireId, medecinId);
     }
 }

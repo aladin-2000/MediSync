@@ -3,26 +3,25 @@ package com.project.medisync.modules.reservations.dto;
 import com.project.medisync.modules.reservations.entity.PropositionRemplacement;
 import com.project.medisync.modules.reservations.entity.StatutPropositionEnum;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 /**
  * Représente la réponse API contenant les détails d'une proposition de remplacement.
  */
 public record PropositionRemplacementResponse(
         /** Identifiant unique de la proposition de remplacement. */
-        UUID id,
+        String id,
 
         /** Identifiant du rendez-vous d'origine qui a été annulé par le médecin. */
-        UUID rendezVousAnnuleId,
+        String rendezVousAnnuleId,
 
         /** Identifiant du nouveau rendez-vous accepté, ou null si non encore accepté ou expirée. */
-        UUID rendezVousNouveauId,
+        String rendezVousNouveauId,
 
         /** Identifiant du délégué médical concerné. */
-        UUID delegueId,
+        String delegueId,
 
         /** Identifiant du médecin concerné. */
-        UUID medecinId,
+        String medecinId,
 
         /** Statut de la proposition (EN_ATTENTE, ACCEPTE, EXPIRE). */
         StatutPropositionEnum statut,

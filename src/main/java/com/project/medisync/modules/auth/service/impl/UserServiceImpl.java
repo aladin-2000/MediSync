@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -21,8 +20,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public User getById(UUID id) {
-        return userRepository.findByIdAndDeletedAtIsNull(id)
+    public User getById(String id) {
+        return userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Utilisateur", id));
     }
 
@@ -41,8 +40,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public boolean existsById(UUID id) {
-        return userRepository.findByIdAndDeletedAtIsNull(id).isPresent();
+    public boolean existsById(String id) {
+        return userRepository.findById(id).isPresent();
     }
 
     @Override
@@ -53,9 +52,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void delete(UUID id) {
+    public void delete(String id) {
         User user = getById(id);
-        user.setDeletedAt(LocalDateTime.now());
         user.setIsActive(false);
         userRepository.save(user);
         log.info("[Auth] Utilisateur {} soft-deleted.", id);

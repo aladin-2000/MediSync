@@ -4,7 +4,6 @@ import com.project.medisync.modules.acces.entity.BlocagePriorite;
 import com.project.medisync.modules.acces.entity.TypeBlocageEnum;
 
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Interface publique du module Accès.
@@ -12,13 +11,13 @@ import java.util.UUID;
  */
 public interface BlocagePrioriteService {
 
-    BlocagePriorite definir(UUID medecinId, UUID delegueId, TypeBlocageEnum type);
+    BlocagePriorite definir(String medecinId, String delegueId, TypeBlocageEnum type);
 
-    BlocagePriorite getByMedecinAndDelegue(UUID medecinId, UUID delegueId);
+    BlocagePriorite getByMedecinAndDelegue(String medecinId, String delegueId);
 
-    List<BlocagePriorite> getByMedecin(UUID medecinId, TypeBlocageEnum type);
+    List<BlocagePriorite> getByMedecin(String medecinId, TypeBlocageEnum type);
 
-    void supprimer(UUID medecinId, UUID delegueId);
+    void supprimer(String medecinId, String delegueId);
 
-    boolean estBloque(UUID medecinId, UUID delegueId);
+    boolean estBloque(String medecinId, String delegueId);
 }

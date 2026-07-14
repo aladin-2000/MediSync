@@ -5,14 +5,13 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Getter
 @Builder
 public class MedecinResponse {
 
-    private UUID          id;
-    private UUID          userId;
+    private String          id;
+    private String        userId;
     private String        nom;
     private String        prenom;
     private String        specialite;

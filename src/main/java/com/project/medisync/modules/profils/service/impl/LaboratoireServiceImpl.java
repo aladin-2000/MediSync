@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -27,7 +26,7 @@ public class LaboratoireServiceImpl implements LaboratoireService {
 
     @Override
     @Transactional
-    public Laboratoire create(UUID userId, String nom, String adresse,
+    public Laboratoire create(String userId, String nom, String adresse,
                               StatutAbonnementEnum statut, LocalDate dateDebut, LocalDate dateFin) {
 
         if (!userService.existsById(userId)) {
@@ -54,7 +53,7 @@ public class LaboratoireServiceImpl implements LaboratoireService {
 
     @Override
     @Transactional(readOnly = true)
-    public Laboratoire getById(UUID id) {
+    public Laboratoire getById(String id) {
         return laboratoireRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Laboratoire", id));
     }
@@ -67,7 +66,7 @@ public class LaboratoireServiceImpl implements LaboratoireService {
 
     @Override
     @Transactional
-    public Laboratoire update(UUID id, String nom, String adresse,
+    public Laboratoire update(String id, String nom, String adresse,
                               StatutAbonnementEnum statut, LocalDate dateDebut, LocalDate dateFin) {
 
         Laboratoire labo = getById(id);
@@ -86,7 +85,7 @@ public class LaboratoireServiceImpl implements LaboratoireService {
 
     @Override
     @Transactional
-    public void updateDernierPaiement(UUID laboratoireId, UUID paiementId) {
+    public void updateDernierPaiement(String laboratoireId, String paiementId) {
         Laboratoire labo = getById(laboratoireId);
         labo.setDernierPaiementId(paiementId);
         laboratoireRepository.save(labo);
@@ -94,7 +93,7 @@ public class LaboratoireServiceImpl implements LaboratoireService {
 
     @Override
     @Transactional
-    public void delete(UUID id) {
+    public void delete(String id) {
         Laboratoire labo = getById(id);
         labo.setDeletedAt(LocalDateTime.now());
         laboratoireRepository.save(labo);

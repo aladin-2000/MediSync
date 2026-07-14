@@ -5,24 +5,23 @@ import com.project.medisync.modules.profils.entity.StatutAbonnementEnum;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Interface publique du service Laboratoire (module Profils).
  */
 public interface LaboratoireService {
 
-    Laboratoire create(UUID userId, String nom, String adresse,
+    Laboratoire create(String userId, String nom, String adresse,
                        StatutAbonnementEnum statut, LocalDate dateDebut, LocalDate dateFin);
 
-    Laboratoire getById(UUID id);
+    Laboratoire getById(String id);
 
     List<Laboratoire> getAll();
 
-    Laboratoire update(UUID id, String nom, String adresse,
+    Laboratoire update(String id, String nom, String adresse,
                        StatutAbonnementEnum statut, LocalDate dateDebut, LocalDate dateFin);
 
-    void updateDernierPaiement(UUID laboratoireId, UUID paiementId);
+    void updateDernierPaiement(String laboratoireId, String paiementId);
 
-    void delete(UUID id);
+    void delete(String id);
 }

@@ -6,18 +6,17 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Repository
-public interface DelegueRepository extends JpaRepository<Delegue, UUID> {
+public interface DelegueRepository extends JpaRepository<Delegue, String> {
 
-    Optional<Delegue> findByIdAndDeletedAtIsNull(UUID id);
+    Optional<Delegue> findByIdAndDeletedAtIsNull(String id);
 
     List<Delegue> findAllByDeletedAtIsNull();
 
-    List<Delegue> findByLaboratoireIdAndDeletedAtIsNull(UUID laboratoireId);
+    List<Delegue> findByLaboratoireIdAndDeletedAtIsNull(String laboratoireId);
 
-    Optional<Delegue> findByUserIdAndDeletedAtIsNull(UUID userId);
+    Optional<Delegue> findByUserIdAndDeletedAtIsNull(String userId);
 
-    boolean existsByUserIdAndDeletedAtIsNull(UUID userId);
+    boolean existsByUserIdAndDeletedAtIsNull(String userId);
 }

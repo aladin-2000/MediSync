@@ -7,8 +7,6 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.UUID;
-
 /**
  * Laboratoire pharmaceutique souscrivant à la plateforme MediSync.
  *
@@ -27,8 +25,8 @@ public class Laboratoire {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id", updatable = false, nullable = false, columnDefinition = "VARCHAR(36)")
-    private UUID id;
+    @Column(name = "id", updatable = false, nullable = false, length = 36)
+    private String id;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
@@ -55,7 +53,7 @@ public class Laboratoire {
      * UUID uniquement — pas de @ManyToOne pour préserver l'isolation modulaire.
      */
     @Column(name = "dernier_paiement_id", columnDefinition = "VARCHAR(36)")
-    private UUID dernierPaiementId;
+    private String dernierPaiementId;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

@@ -1,6 +1,5 @@
 package com.project.medisync.shared.exception;
 
-import java.util.UUID;
 
 /**
  * Exception levée lorsqu'une ressource est introuvable en base de données.
@@ -8,7 +7,7 @@ import java.util.UUID;
  */
 public class ResourceNotFoundException extends RuntimeException {
 
-    public ResourceNotFoundException(String resourceName, UUID id) {
+    public ResourceNotFoundException(String resourceName, String id) {
         super(String.format("%s introuvable avec l'identifiant : %s", resourceName, id));
     }
 

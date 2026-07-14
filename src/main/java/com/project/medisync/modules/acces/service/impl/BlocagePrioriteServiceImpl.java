@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +24,7 @@ public class BlocagePrioriteServiceImpl implements BlocagePrioriteService {
 
     @Override
     @Transactional
-    public BlocagePriorite definir(UUID medecinId, UUID delegueId, TypeBlocageEnum type) {
+    public BlocagePriorite definir(String medecinId, String delegueId, TypeBlocageEnum type) {
         // Upsert : si une règle existe déjà, on la met à jour
         return blocageRepository.findByMedecinIdAndDelegueId(medecinId, delegueId)
                 .map(existant -> {
@@ -42,7 +41,7 @@ public class BlocagePrioriteServiceImpl implements BlocagePrioriteService {
 
     @Override
     @Transactional(readOnly = true)
-    public BlocagePriorite getByMedecinAndDelegue(UUID medecinId, UUID delegueId) {
+    public BlocagePriorite getByMedecinAndDelegue(String medecinId, String delegueId) {
         return blocageRepository.findByMedecinIdAndDelegueId(medecinId, delegueId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Aucune règle d'accès définie entre ce médecin et ce délégué."));
@@ -50,20 +49,20 @@ public class BlocagePrioriteServiceImpl implements BlocagePrioriteService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BlocagePriorite> getByMedecin(UUID medecinId, TypeBlocageEnum type) {
+    public List<BlocagePriorite> getByMedecin(String medecinId, TypeBlocageEnum type) {
         return blocageRepository.findByMedecinIdAndType(medecinId, type);
     }
 
     @Override
     @Transactional
-    public void supprimer(UUID medecinId, UUID delegueId) {
+    public void supprimer(String medecinId, String delegueId) {
         BlocagePriorite blocage = getByMedecinAndDelegue(medecinId, delegueId);
         blocageRepository.delete(blocage);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public boolean estBloque(UUID medecinId, UUID delegueId) {
+    public boolean estBloque(String medecinId, String delegueId) {
         return blocageRepository.existsByMedecinIdAndDelegueIdAndType(medecinId, delegueId, TypeBlocageEnum.BLOQUE);
     }
 }

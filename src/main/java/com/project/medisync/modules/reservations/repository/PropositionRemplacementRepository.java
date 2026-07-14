@@ -7,14 +7,13 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Repository
-public interface PropositionRemplacementRepository extends JpaRepository<PropositionRemplacement, UUID> {
+public interface PropositionRemplacementRepository extends JpaRepository<PropositionRemplacement, String> {
 
-    Optional<PropositionRemplacement> findById(UUID id);
+    Optional<PropositionRemplacement> findById(String id);
 
-    List<PropositionRemplacement> findByDelegueIdAndStatut(UUID delegueId, StatutPropositionEnum statut);
+    List<PropositionRemplacement> findByDelegueIdAndStatut(String delegueId, StatutPropositionEnum statut);
 
     List<PropositionRemplacement> findByStatut(StatutPropositionEnum statut);
 }

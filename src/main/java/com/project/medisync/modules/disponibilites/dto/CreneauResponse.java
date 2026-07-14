@@ -5,11 +5,10 @@ import com.project.medisync.modules.disponibilites.entity.StatutCreneauEnum;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.UUID;
 
 public record CreneauResponse(
-        UUID              id,
-        UUID              medecinId,
+        String              id,
+        String              medecinId,
         LocalDate         date,
         LocalTime         heureDebut,
         LocalTime         heureFin,      // heureDebut + 15 min — calculé à la volée

@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/medecins/{medecinId}/creneaux")
@@ -25,10 +24,10 @@ public class CreneauController {
     /** POST /api/medecins/{medecinId}/creneaux — Création manuelle d'un créneau ponctuel */
     @PostMapping
     public ResponseEntity<ApiResponse<CreneauResponse>> create(
-            @PathVariable UUID medecinId,
+            @PathVariable String medecinId,
             @Valid @RequestBody CreneauRequest request) {
 
-        var creneau = creneauService.createManuel(
+        var creneau = creneauService.createCreneau(
                 medecinId,
                 request.date(),
                 request.heureDebut());
@@ -46,7 +45,7 @@ public class CreneauController {
      */
     @GetMapping
     public ResponseEntity<ApiResponse<List<CreneauResponse>>> getBySemaine(
-            @PathVariable UUID medecinId,
+            @PathVariable String medecinId,
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate semaine) {
 
@@ -64,8 +63,8 @@ public class CreneauController {
     /** GET /api/medecins/{medecinId}/creneaux/{id} */
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<CreneauResponse>> getById(
-            @PathVariable UUID medecinId,
-            @PathVariable UUID id) {
+            @PathVariable String medecinId,
+            @PathVariable String id) {
 
         return ResponseEntity.ok(ApiResponse.ok(
                 "Créneau récupéré.",
@@ -79,7 +78,7 @@ public class CreneauController {
      */
     @GetMapping("/disponibles-remplacement")
     public ResponseEntity<ApiResponse<List<CreneauResponse>>> getDisponiblesPourRemplacement(
-            @PathVariable UUID medecinId) {
+            @PathVariable String medecinId) {
 
         List<CreneauResponse> list = creneauService.getDisponiblesPourRemplacement(medecinId)
                 .stream().map(CreneauResponse::from).toList();
@@ -91,8 +90,8 @@ public class CreneauController {
     /** DELETE /api/medecins/{medecinId}/creneaux/{id} */
     /*@DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> delete(
-            @PathVariable UUID medecinId,
-            @PathVariable UUID id) {
+            @PathVariable String medecinId,
+            @PathVariable String id) {
 
         creneauService.delete(id);
         return ResponseEntity.ok(ApiResponse.ok("Créneau supprimé.", null));

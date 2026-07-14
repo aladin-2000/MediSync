@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Contrôleur REST gérant les opérations CRUD sur les profils des Médecins
@@ -52,13 +51,13 @@ public class MedecinController {
     }
 
     /**
-     * Récupère un profil Médecin spécifique par son identifiant unique UUID.
+     * Récupère un profil Médecin spécifique par son identifiant unique String.
      *
-     * @param id L'identifiant unique UUID du médecin à récupérer
+     * @param id L'identifiant unique String du médecin à récupérer
      * @return Les détails du profil médecin trouvé
      */
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<MedecinResponse>> getById(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<MedecinResponse>> getById(@PathVariable String id) {
         return ResponseEntity.ok(ApiResponse.ok(MedecinResponse.from(medecinService.getById(id))));
     }
 
@@ -79,13 +78,13 @@ public class MedecinController {
     /**
      * Met à jour les informations du profil d'un médecin existant.
      *
-     * @param id L'identifiant unique UUID du médecin à modifier
+     * @param id L'identifiant unique String du médecin à modifier
      * @param req DTO contenant les nouvelles valeurs pour les informations du médecin
      * @return Les détails du profil médecin mis à jour
      */
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<MedecinResponse>> update(
-            @PathVariable UUID id,
+            @PathVariable String id,
             @Valid @RequestBody CreateMedecinRequest req) {
         var medecin = medecinService.update(
                 id, req.getNom(), req.getPrenom(), req.getSpecialite(),
@@ -96,11 +95,11 @@ public class MedecinController {
     /**
      * Supprime de façon logique (soft delete) un médecin de la plateforme.
      *
-     * @param id L'identifiant unique UUID du médecin à soft-delete
+     * @param id L'identifiant unique String du médecin à soft-delete
      * @return Un message indiquant le succès de la suppression logique
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable String id) {
         medecinService.delete(id);
         return ResponseEntity.ok(ApiResponse.ok("Profil médecin supprimé.", null));
     }

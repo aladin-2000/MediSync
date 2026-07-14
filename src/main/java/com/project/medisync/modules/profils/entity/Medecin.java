@@ -23,8 +23,8 @@ public class Medecin {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id", updatable = false, nullable = false, columnDefinition = "VARCHAR(36)")
-    private UUID id;
+    @Column(name = "id", updatable = false, nullable = false, length = 36)
+    private String id;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, unique = true)

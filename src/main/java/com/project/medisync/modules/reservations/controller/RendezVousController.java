@@ -12,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Contrôleur REST gérant les opérations sur les Rendez-vous (réservations, annulations, réalisations).
@@ -47,12 +46,12 @@ public class RendezVousController {
     /**
      * Récupère les informations détaillées d'un rendez-vous par son identifiant unique.
      *
-     * @param id L'identifiant unique UUID du rendez-vous à récupérer.
+     * @param id L'identifiant unique String du rendez-vous à récupérer.
      * @return Les détails du rendez-vous trouvé.
      */
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<RendezVousResponse>> getById(
-            @PathVariable UUID id) {
+            @PathVariable String id) {
         
         var rdv = rendezVousService.getById(id);
         return ResponseEntity.ok(ApiResponse.ok("Rendez-vous récupéré avec succès.", RendezVousResponse.from(rdv)));
@@ -61,12 +60,12 @@ public class RendezVousController {
     /**
      * Récupère la liste de tous les rendez-vous associés à un délégué médical.
      *
-     * @param delegueId L'identifiant unique UUID du délégué médical.
+     * @param delegueId L'identifiant unique String du délégué médical.
      * @return La liste des rendez-vous correspondants.
      */
     @GetMapping("/delegue/{delegueId}")
     public ResponseEntity<ApiResponse<List<RendezVousResponse>>> getByDelegue(
-            @PathVariable UUID delegueId) {
+            @PathVariable String delegueId) {
         
         List<RendezVousResponse> list = rendezVousService.getByDelegue(delegueId)
                 .stream()
@@ -79,12 +78,12 @@ public class RendezVousController {
     /**
      * Récupère la liste de tous les rendez-vous associés à un médecin.
      *
-     * @param medecinId L'identifiant unique UUID du médecin.
+     * @param medecinId L'identifiant unique String du médecin.
      * @return La liste des rendez-vous correspondants.
      */
     @GetMapping("/medecin/{medecinId}")
     public ResponseEntity<ApiResponse<List<RendezVousResponse>>> getByMedecin(
-            @PathVariable UUID medecinId) {
+            @PathVariable String medecinId) {
         
         List<RendezVousResponse> list = rendezVousService.getByMedecin(medecinId)
                 .stream()
@@ -97,12 +96,12 @@ public class RendezVousController {
     /**
      * Annule un rendez-vous à l'initiative du délégué médical.
      *
-     * @param id L'identifiant unique UUID du rendez-vous à annuler.
+     * @param id L'identifiant unique String du rendez-vous à annuler.
      * @return Les détails du rendez-vous annulé.
      */
     @PatchMapping("/{id}/annuler-delegue")
     public ResponseEntity<ApiResponse<RendezVousResponse>> annulerParDelegue(
-            @PathVariable UUID id) {
+            @PathVariable String id) {
         
         var rdv = rendezVousService.annulerParDelegue(id);
         return ResponseEntity.ok(ApiResponse.ok("Rendez-vous annulé avec succès par le délégué.", RendezVousResponse.from(rdv)));
@@ -111,13 +110,13 @@ public class RendezVousController {
     /**
      * Annule un rendez-vous à l'initiative du médecin, avec justification obligatoire.
      *
-     * @param id      L'identifiant unique UUID du rendez-vous à annuler.
+     * @param id      L'identifiant unique String du rendez-vous à annuler.
      * @param request Le DTO contenant le motif d'annulation.
      * @return Les détails du rendez-vous annulé.
      */
     @PatchMapping("/{id}/annuler-medecin")
     public ResponseEntity<ApiResponse<RendezVousResponse>> annulerParMedecin(
-            @PathVariable UUID id,
+            @PathVariable String id,
             @Valid @RequestBody AnnulationMedecinRequest request) {
         
         var rdv = rendezVousService.annulerParMedecin(id, request.motifAnnulation());
@@ -127,12 +126,12 @@ public class RendezVousController {
     /**
      * Marque un rendez-vous comme réalisé.
      *
-     * @param id L'identifiant unique UUID du rendez-vous.
+     * @param id L'identifiant unique String du rendez-vous.
      * @return Les détails du rendez-vous mis à jour.
      */
     @PatchMapping("/{id}/realise")
     public ResponseEntity<ApiResponse<RendezVousResponse>> marquerRealise(
-            @PathVariable UUID id) {
+            @PathVariable String id) {
         
         var rdv = rendezVousService.marquerRealise(id);
         return ResponseEntity.ok(ApiResponse.ok("Rendez-vous marqué comme réalisé.", RendezVousResponse.from(rdv)));
@@ -141,12 +140,12 @@ public class RendezVousController {
     /**
      * Marque le délégué médical comme absent pour le rendez-vous.
      *
-     * @param id L'identifiant unique UUID du rendez-vous.
+     * @param id L'identifiant unique String du rendez-vous.
      * @return Les détails du rendez-vous mis à jour.
      */
     @PatchMapping("/{id}/absent")
     public ResponseEntity<ApiResponse<RendezVousResponse>> marquerAbsent(
-            @PathVariable UUID id) {
+            @PathVariable String id) {
         
         var rdv = rendezVousService.marquerAbsent(id);
         return ResponseEntity.ok(ApiResponse.ok("Rendez-vous marqué avec absence du délégué.", RendezVousResponse.from(rdv)));

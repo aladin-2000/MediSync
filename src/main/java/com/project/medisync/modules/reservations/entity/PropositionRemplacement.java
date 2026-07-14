@@ -33,8 +33,8 @@ public class PropositionRemplacement {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id", updatable = false, nullable = false, columnDefinition = "VARCHAR(36)")
-    private UUID id;
+    @Column(name = "id", updatable = false, nullable = false, length = 36)
+    private String id;
 
     /** Rendez-vous annulé à l'origine de cette proposition. */
     @ManyToOne(fetch = FetchType.LAZY)

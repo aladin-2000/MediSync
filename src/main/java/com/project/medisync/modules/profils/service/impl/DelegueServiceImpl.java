@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -27,7 +26,7 @@ public class DelegueServiceImpl implements DelegueService {
 
     @Override
     @Transactional
-    public Delegue create(UUID userId, UUID laboratoireId, String nom, String prenom, String telephone) {
+    public Delegue create(String userId, String laboratoireId, String nom, String prenom, String telephone) {
 
         if (!userService.existsById(userId)) {
             throw new ResourceNotFoundException("Utilisateur", userId);
@@ -49,7 +48,7 @@ public class DelegueServiceImpl implements DelegueService {
 
     @Override
     @Transactional(readOnly = true)
-    public Delegue getById(UUID id) {
+    public Delegue getById(String id) {
         return delegueRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Délégué", id));
     }
@@ -62,13 +61,13 @@ public class DelegueServiceImpl implements DelegueService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Delegue> getByLaboratoire(UUID laboratoireId) {
+    public List<Delegue> getByLaboratoire(String laboratoireId) {
         return delegueRepository.findByLaboratoireIdAndDeletedAtIsNull(laboratoireId);
     }
 
     @Override
     @Transactional
-    public Delegue update(UUID id, String nom, String prenom, String telephone) {
+    public Delegue update(String id, String nom, String prenom, String telephone) {
         Delegue delegue = getById(id);
         if (nom       != null) delegue.setNom(nom);
         if (prenom    != null) delegue.setPrenom(prenom);
@@ -78,7 +77,7 @@ public class DelegueServiceImpl implements DelegueService {
 
     @Override
     @Transactional
-    public void updateScoreFiabilite(UUID id, Float nouveauScore) {
+    public void updateScoreFiabilite(String id, Float nouveauScore) {
         if (nouveauScore < 0 || nouveauScore > 100) {
             throw new BusinessException("Le score de fiabilité doit être compris entre 0 et 100.");
         }
@@ -89,7 +88,7 @@ public class DelegueServiceImpl implements DelegueService {
 
     @Override
     @Transactional
-    public void delete(UUID id) {
+    public void delete(String id) {
         Delegue delegue = getById(id);
         delegue.setDeletedAt(LocalDateTime.now());
         delegueRepository.save(delegue);

@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Contrôleur REST gérant les opérations CRUD sur les profils des Laboratoires
@@ -52,26 +51,26 @@ public class LaboratoireController {
     }
 
     /**
-     * Récupère un profil de Laboratoire spécifique par son identifiant unique UUID.
+     * Récupère un profil de Laboratoire spécifique par son identifiant unique String.
      *
-     * @param id L'identifiant unique UUID du laboratoire à récupérer
+     * @param id L'identifiant unique String du laboratoire à récupérer
      * @return Les détails du laboratoire trouvé
      */
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<LaboratoireResponse>> getById(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<LaboratoireResponse>> getById(@PathVariable String id) {
         return ResponseEntity.ok(ApiResponse.ok(LaboratoireResponse.from(laboratoireService.getById(id))));
     }
 
     /**
      * Met à jour les informations d'un profil de Laboratoire existant.
      *
-     * @param id L'identifiant unique UUID du laboratoire à modifier
+     * @param id L'identifiant unique String du laboratoire à modifier
      * @param req DTO contenant les nouvelles valeurs pour les informations du laboratoire
      * @return Les détails du laboratoire mis à jour
      */
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<LaboratoireResponse>> update(
-            @PathVariable UUID id,
+            @PathVariable String id,
             @Valid @RequestBody CreateLaboratoireRequest req) {
         var labo = laboratoireService.update(
                 id, req.getNom(), req.getAdresse(),
@@ -82,11 +81,11 @@ public class LaboratoireController {
     /**
      * Supprime de façon logique (soft delete) un laboratoire de la plateforme.
      *
-     * @param id L'identifiant unique UUID du laboratoire à soft-delete
+     * @param id L'identifiant unique String du laboratoire à soft-delete
      * @return Un message indiquant le succès de la suppression logique
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable String id) {
         laboratoireService.delete(id);
         return ResponseEntity.ok(ApiResponse.ok("Laboratoire supprimé.", null));
     }

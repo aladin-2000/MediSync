@@ -26,8 +26,8 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id", updatable = false, nullable = false, columnDefinition = "VARCHAR(36)")
-    private UUID id;
+    @Column(name = "id", updatable = false, nullable = false, length = 36)
+    private String id;
 
     @Column(name = "email", nullable = false, unique = true, length = 255)
     private String email;
@@ -47,7 +47,4 @@ public class User {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    /** Soft delete — null si l'utilisateur est actif. */
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
 }

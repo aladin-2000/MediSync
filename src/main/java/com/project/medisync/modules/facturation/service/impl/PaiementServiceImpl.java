@@ -15,7 +15,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -26,7 +25,7 @@ public class PaiementServiceImpl implements PaiementService {
 
     @Override
     @Transactional
-    public Paiement create(UUID laboratoireId, BigDecimal montant, String devise,
+    public Paiement create(String laboratoireId, BigDecimal montant, String devise,
                            StatutPaiementEnum statut, MethodePaiementEnum methode,
                            String referenceExterne, LocalDate periodeDebut, LocalDate periodeFin) {
         Paiement paiement = Paiement.builder()
@@ -44,20 +43,20 @@ public class PaiementServiceImpl implements PaiementService {
 
     @Override
     @Transactional(readOnly = true)
-    public Paiement getById(UUID id) {
+    public Paiement getById(String id) {
         return paiementRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Paiement", id));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<Paiement> getByLaboratoire(UUID laboratoireId) {
+    public List<Paiement> getByLaboratoire(String laboratoireId) {
         return paiementRepository.findByLaboratoireIdAndDeletedAtIsNull(laboratoireId);
     }
 
     @Override
     @Transactional
-    public Paiement updateStatut(UUID id, StatutPaiementEnum nouveauStatut) {
+    public Paiement updateStatut(String id, StatutPaiementEnum nouveauStatut) {
         Paiement paiement = getById(id);
         paiement.setStatut(nouveauStatut);
         return paiementRepository.save(paiement);
@@ -65,7 +64,7 @@ public class PaiementServiceImpl implements PaiementService {
 
     @Override
     @Transactional
-    public void delete(UUID id) {
+    public void delete(String id) {
         Paiement paiement = getById(id);
         paiement.setDeletedAt(LocalDateTime.now());
         paiementRepository.save(paiement);

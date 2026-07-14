@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -25,7 +24,7 @@ public class MedecinServiceImpl implements MedecinService {
 
     @Override
     @Transactional
-    public Medecin create(UUID userId, String nom, String prenom, String specialite,
+    public Medecin create(String userId, String nom, String prenom, String specialite,
                           String adresseCabinet, Double latitude, Double longitude, Float scoreFiabiliteMin) {
 
         if (!userService.existsById(userId)) {
@@ -51,7 +50,7 @@ public class MedecinServiceImpl implements MedecinService {
 
     @Override
     @Transactional(readOnly = true)
-    public Medecin getById(UUID id) {
+    public Medecin getById(String id) {
         return medecinRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Médecin", id));
     }
@@ -70,7 +69,7 @@ public class MedecinServiceImpl implements MedecinService {
 
     @Override
     @Transactional
-    public Medecin update(UUID id, String nom, String prenom, String specialite,
+    public Medecin update(String id, String nom, String prenom, String specialite,
                           String adresseCabinet, Double latitude, Double longitude, Float scoreFiabiliteMin) {
 
         Medecin medecin = getById(id);
@@ -86,7 +85,7 @@ public class MedecinServiceImpl implements MedecinService {
 
     @Override
     @Transactional
-    public void delete(UUID id) {
+    public void delete(String id) {
         Medecin medecin = getById(id);
         medecin.setDeletedAt(LocalDateTime.now());
         medecinRepository.save(medecin);

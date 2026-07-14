@@ -7,20 +7,19 @@ import lombok.Getter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Getter
 @Builder
 public class LaboratoireResponse {
 
-    private UUID                 id;
-    private UUID                 userId;
+    private String                 id;
+    private String               userId;
     private String               nom;
     private String               adresse;
     private StatutAbonnementEnum statutAbonnement;
     private LocalDate            dateDebutAbonnement;
     private LocalDate            dateFinAbonnement;
-    private UUID                 dernierPaiementId;
+    private String                 dernierPaiementId;
     private LocalDateTime        createdAt;
 
     public static LaboratoireResponse from(Laboratoire labo) {

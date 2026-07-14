@@ -14,9 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.String;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -31,7 +31,7 @@ public class RendezVousServiceImpl implements RendezVousService {
 
     @Override
     @Transactional
-    public RendezVous reserver(UUID creneauId, UUID delegueId, UUID medecinId) {
+    public RendezVous reserver(String creneauId, String delegueId, String medecinId) {
         // 1. Créneau déjà réservé ?
         if (rendezVousRepository.existsByCreneauIdAndStatutNotAndDeletedAtIsNull(creneauId, StatutRendezVousEnum.ANNULE)) {
             throw new BusinessException("Ce créneau est déjà réservé.");
@@ -54,26 +54,26 @@ public class RendezVousServiceImpl implements RendezVousService {
 
     @Override
     @Transactional(readOnly = true)
-    public RendezVous getById(UUID id) {
+    public RendezVous getById(String id) {
         return rendezVousRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Rendez-vous", id));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<RendezVous> getByDelegue(UUID delegueId) {
+    public List<RendezVous> getByDelegue(String delegueId) {
         return rendezVousRepository.findByDelegueIdAndDeletedAtIsNull(delegueId);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<RendezVous> getByMedecin(UUID medecinId) {
+    public List<RendezVous> getByMedecin(String medecinId) {
         return rendezVousRepository.findByMedecinIdAndDeletedAtIsNull(medecinId);
     }
 
     @Override
     @Transactional
-    public RendezVous annulerParDelegue(UUID rendezVousId) {
+    public RendezVous annulerParDelegue(String rendezVousId) {
         RendezVous rdv = getById(rendezVousId);
         rdv.setStatut(StatutRendezVousEnum.ANNULE);
         rdv.setAnnulePar(AnnuleParEnum.DELEGUE);
@@ -83,7 +83,7 @@ public class RendezVousServiceImpl implements RendezVousService {
 
     @Override
     @Transactional
-    public RendezVous annulerParMedecin(UUID rendezVousId, String motifAnnulation) {
+    public RendezVous annulerParMedecin(String rendezVousId, String motifAnnulation) {
         if (motifAnnulation == null || motifAnnulation.isBlank()) {
             throw new BusinessException("Le motif d'annulation est obligatoire lorsque c'est le médecin qui annule.");
         }
@@ -109,7 +109,7 @@ public class RendezVousServiceImpl implements RendezVousService {
 
     @Override
     @Transactional
-    public RendezVous marquerRealise(UUID rendezVousId) {
+    public RendezVous marquerRealise(String rendezVousId) {
         RendezVous rdv = getById(rendezVousId);
         rdv.setStatut(StatutRendezVousEnum.REALISE);
         return rendezVousRepository.save(rdv);
@@ -117,7 +117,7 @@ public class RendezVousServiceImpl implements RendezVousService {
 
     @Override
     @Transactional
-    public RendezVous marquerAbsent(UUID rendezVousId) {
+    public RendezVous marquerAbsent(String rendezVousId) {
         RendezVous rdv = getById(rendezVousId);
         rdv.setStatut(StatutRendezVousEnum.ABSENT);
         return rendezVousRepository.save(rdv);

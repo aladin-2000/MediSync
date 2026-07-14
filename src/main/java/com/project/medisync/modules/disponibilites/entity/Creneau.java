@@ -35,15 +35,15 @@ public class Creneau {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id", updatable = false, nullable = false, columnDefinition = "VARCHAR(36)")
-    private UUID id;
+    @Column(name = "id", updatable = false, nullable = false, length = 36)
+    private String id;
 
     /**
      * Référence vers le médecin propriétaire (module Profils).
      * UUID uniquement — isolation modulaire.
      */
     @Column(name = "medecin_id", nullable = false, columnDefinition = "VARCHAR(36)")
-    private UUID medecinId;
+    private String medecinId;
 
     @Column(name = "date", nullable = false)
     private LocalDate date;

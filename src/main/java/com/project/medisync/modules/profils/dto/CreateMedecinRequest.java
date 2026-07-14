@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -14,7 +13,7 @@ import java.util.UUID;
 public class CreateMedecinRequest {
 
     @NotNull(message = "L'identifiant utilisateur est obligatoire.")
-    private UUID userId;
+    private String userId;
 
     @NotBlank(message = "Le nom est obligatoire.")
     private String nom;

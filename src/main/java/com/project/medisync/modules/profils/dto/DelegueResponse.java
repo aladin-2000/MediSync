@@ -5,15 +5,14 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Getter
 @Builder
 public class DelegueResponse {
 
-    private UUID          id;
-    private UUID          userId;
-    private UUID          laboratoireId;
+    private String          id;
+    private String          userId;
+    private String          laboratoireId;
     private String        nom;
     private String        prenom;
     private String        telephone;

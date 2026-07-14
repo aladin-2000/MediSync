@@ -7,7 +7,6 @@ import com.project.medisync.modules.facturation.entity.StatutPaiementEnum;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Interface publique du module Facturation.
@@ -15,15 +14,15 @@ import java.util.UUID;
  */
 public interface PaiementService {
 
-    Paiement create(UUID laboratoireId, BigDecimal montant, String devise,
+    Paiement create(String laboratoireId, BigDecimal montant, String devise,
                     StatutPaiementEnum statut, MethodePaiementEnum methode,
                     String referenceExterne, LocalDate periodeDebut, LocalDate periodeFin);
 
-    Paiement getById(UUID id);
+    Paiement getById(String id);
 
-    List<Paiement> getByLaboratoire(UUID laboratoireId);
+    List<Paiement> getByLaboratoire(String laboratoireId);
 
-    Paiement updateStatut(UUID id, StatutPaiementEnum nouveauStatut);
+    Paiement updateStatut(String id, StatutPaiementEnum nouveauStatut);
 
-    void delete(UUID id);
+    void delete(String id);
 }

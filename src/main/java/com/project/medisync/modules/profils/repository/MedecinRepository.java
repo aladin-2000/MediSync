@@ -6,18 +6,17 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Repository
-public interface MedecinRepository extends JpaRepository<Medecin, UUID> {
+public interface MedecinRepository extends JpaRepository<Medecin, String> {
 
-    Optional<Medecin> findByIdAndDeletedAtIsNull(UUID id);
+    Optional<Medecin> findByIdAndDeletedAtIsNull(String id);
 
     List<Medecin> findAllByDeletedAtIsNull();
 
-    Optional<Medecin> findByUserIdAndDeletedAtIsNull(UUID userId);
+    Optional<Medecin> findByUserIdAndDeletedAtIsNull(String userId);
 
     List<Medecin> findBySpecialiteContainingIgnoreCaseAndDeletedAtIsNull(String specialite);
 
-    boolean existsByUserIdAndDeletedAtIsNull(UUID userId);
+    boolean existsByUserIdAndDeletedAtIsNull(String userId);
 }

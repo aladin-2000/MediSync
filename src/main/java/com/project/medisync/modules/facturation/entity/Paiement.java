@@ -7,7 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.UUID;
+
 
 /**
  * Paiement d'abonnement effectué par un laboratoire.
@@ -27,14 +27,14 @@ public class Paiement {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", updatable = false, nullable = false, columnDefinition = "VARCHAR(36)")
-    private UUID id;
+    private String id;
 
     /**
      * Référence vers Laboratoire (module Profils).
      * Intentionnellement sans @ManyToOne pour respecter l'isolation modulaire.
      */
     @Column(name = "laboratoire_id", nullable = false, columnDefinition = "VARCHAR(36)")
-    private UUID laboratoireId;
+    private String laboratoireId;
 
     @Column(name = "montant", nullable = false, precision = 10, scale = 2)
     private BigDecimal montant;

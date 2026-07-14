@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -30,20 +29,20 @@ public class PropositionRemplacementServiceImpl implements PropositionRemplaceme
 
     @Override
     @Transactional(readOnly = true)
-    public PropositionRemplacement getById(UUID id) {
+    public PropositionRemplacement getById(String id) {
         return propositionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("PropositionRemplacement", id));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<PropositionRemplacement> getEnAttenteByDelegue(UUID delegueId) {
+    public List<PropositionRemplacement> getEnAttenteByDelegue(String delegueId) {
         return propositionRepository.findByDelegueIdAndStatut(delegueId, StatutPropositionEnum.EN_ATTENTE);
     }
 
     @Override
     @Transactional
-    public PropositionRemplacement accepter(UUID propositionId, UUID nouveauCreneauId) {
+    public PropositionRemplacement accepter(String propositionId, String nouveauCreneauId) {
         PropositionRemplacement proposition = getById(propositionId);
         if (proposition.getStatut() != StatutPropositionEnum.EN_ATTENTE) {
             throw new BusinessException("Cette proposition n'est plus en attente.");

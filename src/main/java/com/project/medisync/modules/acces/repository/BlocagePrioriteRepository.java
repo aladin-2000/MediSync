@@ -7,14 +7,13 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Repository
-public interface BlocagePrioriteRepository extends JpaRepository<BlocagePriorite, UUID> {
+public interface BlocagePrioriteRepository extends JpaRepository<BlocagePriorite, String> {
 
-    Optional<BlocagePriorite> findByMedecinIdAndDelegueId(UUID medecinId, UUID delegueId);
+    Optional<BlocagePriorite> findByMedecinIdAndDelegueId(String medecinId, String delegueId);
 
-    List<BlocagePriorite> findByMedecinIdAndType(UUID medecinId, TypeBlocageEnum type);
+    List<BlocagePriorite> findByMedecinIdAndType(String medecinId, TypeBlocageEnum type);
 
-    boolean existsByMedecinIdAndDelegueIdAndType(UUID medecinId, UUID delegueId, TypeBlocageEnum type);
+    boolean existsByMedecinIdAndDelegueIdAndType(String medecinId, String delegueId, TypeBlocageEnum type);
 }

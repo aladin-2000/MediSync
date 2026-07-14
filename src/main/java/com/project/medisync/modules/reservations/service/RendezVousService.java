@@ -3,7 +3,6 @@ package com.project.medisync.modules.reservations.service;
 import com.project.medisync.modules.reservations.entity.RendezVous;
 
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Interface publique du module Réservations.
@@ -19,23 +18,23 @@ import java.util.UUID;
  */
 public interface RendezVousService {
 
-    RendezVous reserver(UUID creneauId, UUID delegueId, UUID medecinId);
+    RendezVous reserver(String creneauId, String delegueId, String medecinId);
 
-    RendezVous getById(UUID id);
+    RendezVous getById(String id);
 
-    List<RendezVous> getByDelegue(UUID delegueId);
+    List<RendezVous> getByDelegue(String delegueId);
 
-    List<RendezVous> getByMedecin(UUID medecinId);
+    List<RendezVous> getByMedecin(String medecinId);
 
     /** Annulation par le délégué. */
-    RendezVous annulerParDelegue(UUID rendezVousId);
+    RendezVous annulerParDelegue(String rendezVousId);
 
     /** Annulation par le médecin — motif obligatoire, déclenche une PropositionRemplacement. */
-    RendezVous annulerParMedecin(UUID rendezVousId, String motifAnnulation);
+    RendezVous annulerParMedecin(String rendezVousId, String motifAnnulation);
 
     /** Marque un rendez-vous comme réalisé. */
-    RendezVous marquerRealise(UUID rendezVousId);
+    RendezVous marquerRealise(String rendezVousId);
 
     /** Marque le délégué comme absent. */
-    RendezVous marquerAbsent(UUID rendezVousId);
+    RendezVous marquerAbsent(String rendezVousId);
 }

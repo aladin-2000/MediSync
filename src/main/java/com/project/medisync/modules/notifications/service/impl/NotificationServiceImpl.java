@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -22,7 +21,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Transactional
-    public Notification envoyer(UUID userId, TypeNotificationEnum type, String contenu) {
+    public Notification envoyer(String userId, TypeNotificationEnum type, String contenu) {
         Notification notification = Notification.builder()
                 .user(userService.getById(userId))
                 .type(type)
@@ -34,25 +33,25 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Notification> getByUser(UUID userId) {
+    public List<Notification> getByUser(String userId) {
         return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<Notification> getNonLuesByUser(UUID userId) {
+    public List<Notification> getNonLuesByUser(String userId) {
         return notificationRepository.findByUserIdAndIsReadFalse(userId);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public long countNonLues(UUID userId) {
+    public long countNonLues(String userId) {
         return notificationRepository.countByUserIdAndIsReadFalse(userId);
     }
 
     @Override
     @Transactional
-    public void marquerLue(UUID notificationId) {
+    public void marquerLue(String notificationId) {
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Notification", notificationId));
         notification.setIsRead(true);
@@ -61,7 +60,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Transactional
-    public void marquerToutesLues(UUID userId) {
+    public void marquerToutesLues(String userId) {
         notificationRepository.findByUserIdAndIsReadFalse(userId).forEach(n -> {
             n.setIsRead(true);
             notificationRepository.save(n);
