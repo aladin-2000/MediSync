@@ -17,7 +17,7 @@ import java.util.List;
  * dans le cadre du module Profils.
  */
 @RestController
-@RequestMapping("/api/medecins")
+@RequestMapping("/medecin")
 @RequiredArgsConstructor
 public class MedecinController {
 

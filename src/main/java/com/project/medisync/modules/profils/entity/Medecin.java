@@ -64,7 +64,4 @@ public class Medecin {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    /** Soft delete. */
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
 }

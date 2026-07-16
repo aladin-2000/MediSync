@@ -30,7 +30,7 @@ public class MedecinServiceImpl implements MedecinService {
         if (!userService.existsById(userId)) {
             throw new ResourceNotFoundException("Utilisateur", userId);
         }
-        if (medecinRepository.existsByUserIdAndDeletedAtIsNull(userId)) {
+        if (medecinRepository.existsByUserId(userId)) {
             throw new BusinessException("Un profil médecin existe déjà pour cet utilisateur.");
         }
 
@@ -51,20 +51,20 @@ public class MedecinServiceImpl implements MedecinService {
     @Override
     @Transactional(readOnly = true)
     public Medecin getById(String id) {
-        return medecinRepository.findByIdAndDeletedAtIsNull(id)
+        return medecinRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Médecin", id));
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<Medecin> getAll() {
-        return medecinRepository.findAllByDeletedAtIsNull();
+        return medecinRepository.findAll();
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<Medecin> getBySpecialite(String specialite) {
-        return medecinRepository.findBySpecialiteContainingIgnoreCaseAndDeletedAtIsNull(specialite);
+        return medecinRepository.findBySpecialiteContainingIgnoreCase(specialite);
     }
 
     @Override
@@ -87,7 +87,6 @@ public class MedecinServiceImpl implements MedecinService {
     @Transactional
     public void delete(String id) {
         Medecin medecin = getById(id);
-        medecin.setDeletedAt(LocalDateTime.now());
         medecinRepository.save(medecin);
         log.info("[Profils] Médecin {} soft-deleted.", id);
     }

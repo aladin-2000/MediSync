@@ -21,7 +21,7 @@ import java.util.List;
  * dans le cadre du module Auth (Authentification).
  */
 @RestController
-@RequestMapping("/api/users/")
+@RequestMapping("/users/")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -148,9 +148,14 @@ public class UserController {
      * @param id L'identifiant unique String de l'utilisateur à récupérer
      * @return Les détails de l'utilisateur trouvé
      */
-    @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<UserResponse>> getById(@PathVariable String id) {
+    @GetMapping()
+    public ResponseEntity<ApiResponse<UserResponse>> getById(@RequestParam  String id) {
         return ResponseEntity.ok(ApiResponse.ok(UserResponse.from(userService.getById(id))));
+    }
+
+    @GetMapping("/email")
+    public ResponseEntity<ApiResponse<UserResponse>> getByUserEmail(@RequestParam  String email) {
+        return ResponseEntity.ok(ApiResponse.ok(UserResponse.from(userService.getByEmail(email))));
     }
 
     /**

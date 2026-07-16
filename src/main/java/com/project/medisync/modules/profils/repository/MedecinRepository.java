@@ -10,13 +10,11 @@ import java.util.Optional;
 @Repository
 public interface MedecinRepository extends JpaRepository<Medecin, String> {
 
-    Optional<Medecin> findByIdAndDeletedAtIsNull(String id);
+    Optional<Medecin> findById(String id);
 
-    List<Medecin> findAllByDeletedAtIsNull();
+    Optional<Medecin> findByUserId(String userId);
 
-    Optional<Medecin> findByUserIdAndDeletedAtIsNull(String userId);
+    List<Medecin> findBySpecialiteContainingIgnoreCase(String specialite);
 
-    List<Medecin> findBySpecialiteContainingIgnoreCaseAndDeletedAtIsNull(String specialite);
-
-    boolean existsByUserIdAndDeletedAtIsNull(String userId);
+    boolean existsByUserId(String userId);
 }

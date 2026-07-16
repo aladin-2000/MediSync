@@ -13,6 +13,5 @@ public interface UserRepository extends JpaRepository<User, String> {
 
     boolean existsByEmail(String email);
 
-    /** Exclut les utilisateurs soft-deleted. */
     Optional<User> findById(String id);
 }
