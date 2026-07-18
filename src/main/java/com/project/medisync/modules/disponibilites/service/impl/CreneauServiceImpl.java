@@ -18,6 +18,7 @@ import java.time.temporal.TemporalAdjusters;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -26,8 +27,15 @@ public class CreneauServiceImpl implements CreneauService {
 
     private static final int DUREE_CRENEAU_MINUTES = 15;
 
-    private final CreneauRepository                   creneauRepo;
-    private final MedecinService                      medecinService;
+    private final CreneauRepository
+            creneauRepo;
+
+    /** Clé de dédoublonnage en mémoire (date + heure) pour éviter un exists() par créneau généré. */
+    private record CreneauKey(LocalDate date, LocalTime heureDebut) {}
+    @Override
+    public List<Creneau> getAllCreneaux(){
+        return creneauRepo.findAll();
+    }
 
     @Override
     @Transactional
@@ -48,6 +56,67 @@ public class CreneauServiceImpl implements CreneauService {
         Creneau saved = creneauRepo.save(creneau);
         log.info("[Disponibilites] Créneau manuel créé — médecin {} le {} à {}", medecinId, date, heureDebut);
         return saved;
+    }
+
+    @Override
+    @Transactional
+    public List<Creneau> ajouterUnePlageDeCreneaux(String medecinId, LocalDate dateDebut, LocalDate dateFin,
+                                                     LocalTime heureDebut, LocalTime heureFin) {
+
+        if (dateFin.isBefore(dateDebut)) {
+            throw new BusinessException("La date de fin doit être postérieure ou égale à la date de début.");
+        }
+        if (!heureFin.isAfter(heureDebut)) {
+            throw new BusinessException("L'heure de fin doit être postérieure à l'heure de début.");
+        }
+
+        // Un seul SELECT pour récupérer les créneaux déjà existants sur la période,
+        // au lieu d'un exists() par créneau généré.
+        Set<CreneauKey> existants = creneauRepo.findByMedecinIdAndDateBetween(medecinId, dateDebut, dateFin)
+                .stream()
+                .map(c -> new CreneauKey(c.getDate(), c.getHeureDebut()))
+                .collect(java.util.stream.Collectors.toSet());
+
+        List<Creneau> creneaux = new ArrayList<>();
+
+        for (LocalDate date = dateDebut; !date.isAfter(dateFin); date = date.plusDays(1)) {
+            for (LocalTime heure = heureDebut; heure.isBefore(heureFin); heure = heure.plusMinutes(DUREE_CRENEAU_MINUTES)) {
+
+                if (!existants.add(new CreneauKey(date, heure))) {
+                    continue;
+                }
+
+                creneaux.add(Creneau.builder()
+                        .medecinId(medecinId)
+                        .date(date)
+                        .heureDebut(heure)
+                        .build());
+            }
+        }
+
+        List<Creneau> saved = creneauRepo.saveAll(creneaux);
+        log.info("[Disponibilites] {} créneaux générés pour le médecin {} du {} au {}.",
+                saved.size(), medecinId, dateDebut, dateFin);
+        return saved;
+    }
+
+    @Override
+    @Transactional
+    public int supprimerUnePlageDeCreneaux(String medecinId, LocalDate dateDebut, LocalDate dateFin,
+                                            LocalTime heureDebut, LocalTime heureFin) {
+
+        if (dateFin.isBefore(dateDebut)) {
+            throw new BusinessException("La date de fin doit être postérieure ou égale à la date de début.");
+        }
+        if (!heureFin.isAfter(heureDebut)) {
+            throw new BusinessException("L'heure de fin doit être postérieure à l'heure de début.");
+        }
+
+        int nbSupprimes = creneauRepo.deleteDisponiblesByMedecinIdAndPlage(
+                medecinId, dateDebut, dateFin, heureDebut, heureFin);
+        log.info("[Disponibilites] {} créneaux supprimés pour le médecin {} du {} au {}.",
+                nbSupprimes, medecinId, dateDebut, dateFin);
+        return nbSupprimes;
     }
 
     @Override

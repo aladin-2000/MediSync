@@ -1,5 +1,6 @@
 package com.project.medisync.modules.disponibilites.controller;
 
+import com.project.medisync.modules.disponibilites.dto.CreneauGenerationRequest;
 import com.project.medisync.modules.disponibilites.dto.CreneauRequest;
 import com.project.medisync.modules.disponibilites.dto.CreneauResponse;
 import com.project.medisync.modules.disponibilites.service.CreneauService;
@@ -15,16 +16,16 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/medecins/{medecinId}/creneaux")
+@RequestMapping("/medecins/creneaux")
 @RequiredArgsConstructor
 public class CreneauController {
 
     private final CreneauService creneauService;
 
-    /** POST /api/medecins/{medecinId}/creneaux — Création manuelle d'un créneau ponctuel */
-    @PostMapping
+    /** POST /api/medecins/creneaux — Création manuelle d'un créneau ponctuel */
+    @PostMapping("Ajouter-un-créneau")
     public ResponseEntity<ApiResponse<CreneauResponse>> create(
-            @PathVariable String medecinId,
+            @RequestParam String medecinId,
             @Valid @RequestBody CreneauRequest request) {
 
         var creneau = creneauService.createCreneau(
@@ -38,6 +39,49 @@ public class CreneauController {
                         CreneauResponse.from(creneau)));
     }
 
+    /** POST /api/medecins/creneaux/ajouter-une-plage-de-creneaux — Génération en masse de créneaux sur une plage de dates/heures */
+    @PostMapping("/ajouter-une-plage-de-creneaux")
+    public ResponseEntity<ApiResponse<List<CreneauResponse>>> ajouterUnePlageDeCreneaux(
+            @RequestParam String medecinId,
+            @Valid @RequestBody CreneauGenerationRequest request) {
+
+        List<CreneauResponse> list = creneauService.ajouterUnePlageDeCreneaux(
+                        medecinId,
+                        request.dateDebut(),
+                        request.dateFin(),
+                        request.heureDebut(),
+                        request.heureFin())
+                .stream().map(CreneauResponse::from).toList();
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.ok(
+                        list.size() + " créneau(x) créé(s) avec succès.",
+                        list));
+    }
+
+    /** DELETE /api/medecins/creneaux/supprimer-une-plage-de-creneaux — Suppression en masse des créneaux DISPONIBLES sur une plage de dates/heures */
+    @DeleteMapping("/supprimer-une-plage-de-creneaux")
+    public ResponseEntity<ApiResponse<Void>> supprimerUnePlageDeCreneaux(
+            @RequestParam String medecinId,
+            @Valid @RequestBody CreneauGenerationRequest request) {
+
+        int nbSupprimes = creneauService.supprimerUnePlageDeCreneaux(
+                medecinId,
+                request.dateDebut(),
+                request.dateFin(),
+                request.heureDebut(),
+                request.heureFin());
+
+        return ResponseEntity.ok(ApiResponse.ok(
+                nbSupprimes + " créneau(x) supprimé(s) avec succès.", null));
+    }
+
+    @GetMapping("/all-creneaux")
+    public ResponseEntity<ApiResponse<List<CreneauResponse>>> getAllCreneaux(){
+        List<CreneauResponse> list = creneauService.getAllCreneaux().stream().map(CreneauResponse::from).toList();
+        return ResponseEntity.ok(ApiResponse.ok(list));
+    }
+
     /**
      * GET /api/medecins/{medecinId}/creneaux?semaine=2025-06-30
      * Retourne tous les créneaux d'un médecin pour la semaine
@@ -45,7 +89,7 @@ public class CreneauController {
      */
     @GetMapping
     public ResponseEntity<ApiResponse<List<CreneauResponse>>> getBySemaine(
-            @PathVariable String medecinId,
+            @RequestParam String medecinId,
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate semaine) {
 
@@ -63,7 +107,6 @@ public class CreneauController {
     /** GET /api/medecins/{medecinId}/creneaux/{id} */
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<CreneauResponse>> getById(
-            @PathVariable String medecinId,
             @PathVariable String id) {
 
         return ResponseEntity.ok(ApiResponse.ok(
@@ -78,7 +121,7 @@ public class CreneauController {
      */
     @GetMapping("/disponibles-remplacement")
     public ResponseEntity<ApiResponse<List<CreneauResponse>>> getDisponiblesPourRemplacement(
-            @PathVariable String medecinId) {
+            @RequestParam String medecinId) {
 
         List<CreneauResponse> list = creneauService.getDisponiblesPourRemplacement(medecinId)
                 .stream().map(CreneauResponse::from).toList();

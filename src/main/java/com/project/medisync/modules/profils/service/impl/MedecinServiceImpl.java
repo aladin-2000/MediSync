@@ -1,5 +1,7 @@
 package com.project.medisync.modules.profils.service.impl;
 
+import com.project.medisync.modules.auth.entity.RoleEnum;
+import com.project.medisync.modules.auth.entity.User;
 import com.project.medisync.modules.auth.service.UserService;
 import com.project.medisync.modules.profils.entity.Medecin;
 import com.project.medisync.modules.profils.repository.MedecinRepository;
@@ -8,6 +10,7 @@ import com.project.medisync.shared.exception.BusinessException;
 import com.project.medisync.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +24,7 @@ public class MedecinServiceImpl implements MedecinService {
 
     private final MedecinRepository medecinRepository;
     private final UserService        userService; // interface publique Auth — jamais UserRepository
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Override
     @Transactional
@@ -46,6 +50,38 @@ public class MedecinServiceImpl implements MedecinService {
                 .build();
 
         return medecinRepository.save(medecin);
+    }
+
+    @Override
+    @Transactional
+    public Medecin creerMedecinComplet(String email, String password, String nom, String prenom, String specialite,
+                                        String adresseCabinet, Double latitude, Double longitude, Float scoreFiabiliteMin) {
+
+        if (userService.existsByEmail(email)) {
+            throw new BusinessException("Un compte existe déjà avec l'adresse email : " + email);
+        }
+
+        User user = User.builder()
+                .email(email)
+                .passwordHash(passwordEncoder.encode(password))
+                .role(RoleEnum.MEDECIN)
+                .build();
+        User savedUser = userService.save(user);
+
+        Medecin medecin = Medecin.builder()
+                .user(savedUser)
+                .nom(nom)
+                .prenom(prenom)
+                .specialite(specialite)
+                .adresseCabinet(adresseCabinet)
+                .latitude(latitude)
+                .longitude(longitude)
+                .scoreFiabiliteMin(scoreFiabiliteMin != null ? scoreFiabiliteMin : 0f)
+                .build();
+
+        Medecin saved = medecinRepository.save(medecin);
+        log.info("[Profils] Médecin complet créé — compte {} + profil {}.", savedUser.getId(), saved.getId());
+        return saved;
     }
 
     @Override

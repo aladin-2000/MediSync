@@ -27,6 +27,30 @@ public interface CreneauRepository extends JpaRepository<Creneau, String> {
     boolean existsByMedecinIdAndDateAndHeureDebut(
             String medecinId, LocalDate date, java.time.LocalTime heureDebut);
 
+    List<Creneau> findAll();
+
+    /**
+     * Suppression en masse (une seule requête SQL) des créneaux DISPONIBLES
+     * d'un médecin sur une plage de dates/heures. Les créneaux RESERVE ou ANNULE
+     * ne sont jamais supprimés.
+     */
+    @Modifying
+    @Query("""
+            DELETE FROM Creneau c
+            WHERE c.medecinId  = :medecinId
+              AND c.date       BETWEEN :dateDebut AND :dateFin
+              AND c.heureDebut >= :heureDebut
+              AND c.heureDebut <  :heureFin
+              AND c.statut     = com.project.medisync.modules.disponibilites.entity.StatutCreneauEnum.DISPONIBLE
+            """)
+    int deleteDisponiblesByMedecinIdAndPlage(
+            @Param("medecinId")  String medecinId,
+            @Param("dateDebut")  LocalDate dateDebut,
+            @Param("dateFin")    LocalDate dateFin,
+            @Param("heureDebut") java.time.LocalTime heureDebut,
+            @Param("heureFin")   java.time.LocalTime heureFin
+    );
+
     /**
      * Soft-delete en masse des créneaux DISPONIBLES futurs issus d'une règle de récurrence.
      * Appelé quand le médecin désactive ou supprime une DisponibiliteHebdomadaire.

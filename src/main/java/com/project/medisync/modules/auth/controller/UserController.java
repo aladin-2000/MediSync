@@ -1,5 +1,6 @@
 package com.project.medisync.modules.auth.controller;
 
+import com.project.medisync.modules.auth.dto.CreateAdminRequest;
 import com.project.medisync.modules.auth.dto.CreateUserRequest;
 import com.project.medisync.modules.auth.dto.UserResponse;
 import com.project.medisync.modules.auth.entity.RoleEnum;
@@ -11,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,6 +28,7 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     /**
      * Crée un nouvel utilisateur en base de données.
@@ -41,12 +44,30 @@ public class UserController {
         }
         User user = User.builder()
                 .email(req.getEmail())
-                .passwordHash(req.getPassword()) // TODO : encoder via BCrypt (phase sécurité)
+                .passwordHash(passwordEncoder.encode(req.getPassword()))
                 .role(req.getRole())
                 .build();
         User saved = userService.save(user);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.ok("Utilisateur créé avec succès.", UserResponse.from(saved)));
+    }
+
+    /**
+     * Crée directement un compte ADMIN (email + mot de passe, rôle forcé à ADMIN).
+     */
+    @PostMapping("creer-admin")
+    public ResponseEntity<ApiResponse<UserResponse>> creerAdmin(@Valid @RequestBody CreateAdminRequest req) {
+        if (userService.existsByEmail(req.getEmail())) {
+            throw new BusinessException("Un compte existe déjà avec l'adresse email : " + req.getEmail());
+        }
+        User admin = User.builder()
+                .email(req.getEmail())
+                .passwordHash(passwordEncoder.encode(req.getPassword()))
+                .role(RoleEnum.ADMIN)
+                .build();
+        User saved = userService.save(admin);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.ok("Administrateur créé avec succès.", UserResponse.from(saved)));
     }
 
     @PostMapping("load-users")
@@ -121,7 +142,7 @@ public class UserController {
 
             User user = User.builder()
                     .email(req.getEmail())
-                    .passwordHash(req.getPassword())
+                    .passwordHash(passwordEncoder.encode(req.getPassword()))
                     .role(req.getRole())
                     .build();
 

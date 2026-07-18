@@ -1,7 +1,9 @@
 package com.project.medisync.modules.profils.controller;
 
+import com.project.medisync.modules.profils.dto.CreateMedecinCompletRequest;
 import com.project.medisync.modules.profils.dto.CreateMedecinRequest;
 import com.project.medisync.modules.profils.dto.MedecinResponse;
+import com.project.medisync.modules.profils.dto.UpdateMedecinRequest;
 import com.project.medisync.modules.profils.service.MedecinService;
 import com.project.medisync.shared.dto.ApiResponse;
 import jakarta.validation.Valid;
@@ -17,7 +19,7 @@ import java.util.List;
  * dans le cadre du module Profils.
  */
 @RestController
-@RequestMapping("/medecin")
+@RequestMapping("/medecins")
 @RequiredArgsConstructor
 public class MedecinController {
 
@@ -36,6 +38,23 @@ public class MedecinController {
                 req.getAdresseCabinet(), req.getLatitude(), req.getLongitude(), req.getScoreFiabiliteMin());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.ok("Profil médecin créé avec succès.", MedecinResponse.from(medecin)));
+    }
+
+    /**
+     * Admin : crée en un seul appel le compte (email + mot de passe) et le profil médecin.
+     * Permet de créer rapidement des médecins de test depuis une page d'administration.
+     *
+     * @param req DTO contenant email, mot de passe et informations du médecin
+     * @return Les détails du profil médecin créé encapsulés dans un ApiResponse
+     */
+    @PostMapping("/creer-medecin-complet")
+    public ResponseEntity<ApiResponse<MedecinResponse>> creerMedecinComplet(
+            @Valid @RequestBody CreateMedecinCompletRequest req) {
+        var medecin = medecinService.creerMedecinComplet(
+                req.getEmail(), req.getPassword(), req.getNom(), req.getPrenom(), req.getSpecialite(),
+                req.getAdresseCabinet(), req.getLatitude(), req.getLongitude(), req.getScoreFiabiliteMin());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.ok("Compte et profil médecin créés avec succès.", MedecinResponse.from(medecin)));
     }
 
     /**
@@ -85,7 +104,7 @@ public class MedecinController {
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<MedecinResponse>> update(
             @PathVariable String id,
-            @Valid @RequestBody CreateMedecinRequest req) {
+            @Valid @RequestBody UpdateMedecinRequest req) {
         var medecin = medecinService.update(
                 id, req.getNom(), req.getPrenom(), req.getSpecialite(),
                 req.getAdresseCabinet(), req.getLatitude(), req.getLongitude(), req.getScoreFiabiliteMin());
