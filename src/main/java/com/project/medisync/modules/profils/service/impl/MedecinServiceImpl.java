@@ -93,6 +93,13 @@ public class MedecinServiceImpl implements MedecinService {
 
     @Override
     @Transactional(readOnly = true)
+    public Medecin getByUserId(String userId) {
+        return medecinRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Médecin pour l'utilisateur", userId));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<Medecin> getAll() {
         return medecinRepository.findAll();
     }

@@ -22,6 +22,9 @@ public interface MedecinService {
 
     Medecin getById(String id);
 
+    /** Récupère le profil médecin associé à un compte utilisateur. */
+    Medecin getByUserId(String userId);
+
     List<Medecin> getAll();
 
     List<Medecin> getBySpecialite(String specialite);

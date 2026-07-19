@@ -81,6 +81,14 @@ public class MedecinController {
     }
 
     /**
+     * Récupère le profil médecin (et donc son medecinId) à partir du userId du compte connecté.
+     */
+    @GetMapping("/by-user/{userId}")
+    public ResponseEntity<ApiResponse<MedecinResponse>> getByUserId(@PathVariable String userId) {
+        return ResponseEntity.ok(ApiResponse.ok(MedecinResponse.from(medecinService.getByUserId(userId))));
+    }
+
+    /**
      * Récupère la liste des médecins exerçant une spécialité médicale donnée.
      * Effectue une recherche insensible à la casse et partielle.
      *
