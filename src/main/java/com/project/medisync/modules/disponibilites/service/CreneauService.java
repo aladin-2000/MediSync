@@ -33,6 +33,9 @@ public interface CreneauService {
     /** Créneaux d'un médecin pour une semaine donnée (lundi → dimanche). */
     List<Creneau> getBySemaine(String medecinId, LocalDate lundiDeLaSemaine);
 
+    /** Créneaux d'un médecin entre deux dates données (inclus). */
+    List<Creneau> getByPeriode(String medecinId, LocalDate dateDebut, LocalDate dateFin);
+
     /** Créneaux disponibles d'un médecin — semaine en cours + semaine suivante.
      *  Utilisé pour afficher les propositions de remplacement. */
     List<Creneau> getDisponiblesPourRemplacement(String medecinId);

@@ -76,6 +76,20 @@ public class CreneauController {
                 nbSupprimes + " créneau(x) supprimé(s) avec succès.", null));
     }
 
+    /** GET /medecins/creneaux/periode?medecinId=...&dateDebut=...&dateFin=... — Créneaux d'un médecin sur une période donnée */
+    @GetMapping("/periode")
+    public ResponseEntity<ApiResponse<List<CreneauResponse>>> getByPeriode(
+            @RequestParam String medecinId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateDebut,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFin) {
+
+        List<CreneauResponse> list = creneauService.getByPeriode(medecinId, dateDebut, dateFin)
+                .stream().map(CreneauResponse::from).toList();
+
+        return ResponseEntity.ok(ApiResponse.ok(
+                "Créneaux du " + dateDebut + " au " + dateFin + " récupérés.", list));
+    }
+
     @GetMapping("/all-creneaux")
     public ResponseEntity<ApiResponse<List<CreneauResponse>>> getAllCreneaux(){
         List<CreneauResponse> list = creneauService.getAllCreneaux().stream().map(CreneauResponse::from).toList();

@@ -4,18 +4,14 @@ import com.project.medisync.modules.disponibilites.entity.Creneau;
 import com.project.medisync.modules.disponibilites.entity.StatutCreneauEnum;
 import com.project.medisync.modules.disponibilites.repository.CreneauRepository;
 import com.project.medisync.modules.disponibilites.service.CreneauService;
-import com.project.medisync.modules.profils.service.MedecinService;
 import com.project.medisync.shared.exception.BusinessException;
 import com.project.medisync.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.*;
-import java.time.temporal.TemporalAdjusters;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -132,6 +128,15 @@ public class CreneauServiceImpl implements CreneauService {
         LocalDate dimanche = lundiDeLaSemaine.plusDays(6);
         return creneauRepo.findByMedecinIdAndDateBetween(
                 medecinId, lundiDeLaSemaine, dimanche);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Creneau> getByPeriode(String medecinId, LocalDate dateDebut, LocalDate dateFin) {
+        if (dateFin.isBefore(dateDebut)) {
+            throw new BusinessException("La date de fin doit être postérieure ou égale à la date de début.");
+        }
+        return creneauRepo.findByMedecinIdAndDateBetween(medecinId, dateDebut, dateFin);
     }
 
     @Override
