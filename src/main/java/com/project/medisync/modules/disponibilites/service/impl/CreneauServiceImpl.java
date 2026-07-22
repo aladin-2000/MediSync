@@ -141,6 +141,15 @@ public class CreneauServiceImpl implements CreneauService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<String> getMedecinIdsAvecCreneauxLibres(LocalDate date, LocalTime heureDebut, LocalTime heureFin) {
+        if (!heureFin.isAfter(heureDebut)) {
+            throw new BusinessException("L'heure de fin doit être postérieure à l'heure de début.");
+        }
+        return creneauRepo.findDistinctMedecinIdsDisponibles(date, heureDebut, heureFin);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<Creneau> getDisponiblesPourRemplacement(String medecinId) {
         LocalDate debut = LocalDate.now();
         LocalDate fin   = LocalDate.now().plusWeeks(1);

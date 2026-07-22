@@ -106,6 +106,22 @@ public class MedecinServiceImpl implements MedecinService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<Medecin> getByIds(List<String> ids) {
+        return medecinRepository.findAllById(ids);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Medecin> searchByIdsNomSpecialite(List<String> ids, String nom, String specialite) {
+        if (ids.isEmpty()) {
+            return List.of();
+        }
+        return medecinRepository.findByIdInAndNomContainingIgnoreCaseAndSpecialiteContainingIgnoreCase(
+                ids, nom, specialite);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<Medecin> getBySpecialite(String specialite) {
         return medecinRepository.findBySpecialiteContainingIgnoreCase(specialite);
     }

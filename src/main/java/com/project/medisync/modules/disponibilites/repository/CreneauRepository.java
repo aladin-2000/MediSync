@@ -29,6 +29,20 @@ public interface CreneauRepository extends JpaRepository<Creneau, String> {
 
     List<Creneau> findAll();
 
+    /** Ids distincts des médecins ayant au moins un créneau DISPONIBLE sur la plage horaire donnée, à une date donnée. */
+    @Query("""
+            SELECT DISTINCT c.medecinId FROM Creneau c
+            WHERE c.date        = :date
+              AND c.statut      = com.project.medisync.modules.disponibilites.entity.StatutCreneauEnum.DISPONIBLE
+              AND c.heureDebut >= :heureDebut
+              AND c.heureDebut <  :heureFin
+            """)
+    List<String> findDistinctMedecinIdsDisponibles(
+            @Param("date")       LocalDate date,
+            @Param("heureDebut") java.time.LocalTime heureDebut,
+            @Param("heureFin")   java.time.LocalTime heureFin
+    );
+
     /**
      * Suppression en masse (une seule requête SQL) des créneaux DISPONIBLES
      * d'un médecin sur une plage de dates/heures. Les créneaux RESERVE ou ANNULE

@@ -1,5 +1,6 @@
 package com.project.medisync.modules.profils.controller;
 
+import com.project.medisync.modules.disponibilites.service.CreneauService;
 import com.project.medisync.modules.profils.dto.CreateMedecinCompletRequest;
 import com.project.medisync.modules.profils.dto.CreateMedecinRequest;
 import com.project.medisync.modules.profils.dto.MedecinResponse;
@@ -8,10 +9,13 @@ import com.project.medisync.modules.profils.service.MedecinService;
 import com.project.medisync.shared.dto.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 /**
@@ -24,6 +28,7 @@ import java.util.List;
 public class MedecinController {
 
     private final MedecinService medecinService;
+    private final CreneauService creneauService;
 
     /**
      * Crée un nouveau profil Médecin associé à un compte utilisateur existant.
@@ -86,6 +91,48 @@ public class MedecinController {
     @GetMapping("/by-user/{userId}")
     public ResponseEntity<ApiResponse<MedecinResponse>> getByUserId(@PathVariable String userId) {
         return ResponseEntity.ok(ApiResponse.ok(MedecinResponse.from(medecinService.getByUserId(userId))));
+    }
+
+    /**
+     * Retourne les médecins ayant au moins un créneau DISPONIBLE à la date et
+     * dans la plage horaire données.
+     */
+    @GetMapping("/disponibles")
+    public ResponseEntity<ApiResponse<List<MedecinResponse>>> getMedecinsAvecCreneauxLibres(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime heureDebut,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime heureFin) {
+
+        LocalTime debut = heureDebut != null ? heureDebut : LocalTime.MIN;
+        LocalTime fin   = heureFin   != null ? heureFin   : LocalTime.MAX;
+
+        List<String> medecinIds = creneauService.getMedecinIdsAvecCreneauxLibres(date, debut, fin);
+        List<MedecinResponse> list = medecinService.getByIds(medecinIds)
+                .stream().map(MedecinResponse::from).toList();
+
+        return ResponseEntity.ok(ApiResponse.ok(list));
+    }
+
+    /**
+     * Recherche des médecins par nom et/ou spécialité, parmi ceux ayant au moins
+     * un créneau DISPONIBLE à la date et dans la plage horaire données.
+     */
+    @GetMapping("/recherche")
+    public ResponseEntity<ApiResponse<List<MedecinResponse>>> rechercherMedecinsDisponibles(
+            @RequestParam(required = false, defaultValue = "") String nom,
+            @RequestParam(required = false, defaultValue = "") String specialite,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime heureDebut,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime heureFin) {
+
+        LocalTime debut = heureDebut != null ? heureDebut : LocalTime.MIN;
+        LocalTime fin   = heureFin   != null ? heureFin   : LocalTime.MAX;
+
+        List<String> medecinIds = creneauService.getMedecinIdsAvecCreneauxLibres(date, debut, fin);
+        List<MedecinResponse> list = medecinService.searchByIdsNomSpecialite(medecinIds, nom, specialite)
+                .stream().map(MedecinResponse::from).toList();
+
+        return ResponseEntity.ok(ApiResponse.ok(list));
     }
 
     /**

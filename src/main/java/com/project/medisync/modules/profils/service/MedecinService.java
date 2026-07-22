@@ -27,6 +27,12 @@ public interface MedecinService {
 
     List<Medecin> getAll();
 
+    /** Récupère plusieurs médecins par leurs ids (une seule requête). */
+    List<Medecin> getByIds(List<String> ids);
+
+    /** Recherche par nom + spécialité (partiel) parmi une liste d'ids donnée. */
+    List<Medecin> searchByIdsNomSpecialite(List<String> ids, String nom, String specialite);
+
     List<Medecin> getBySpecialite(String specialite);
 
     Medecin update(String id, String nom, String prenom, String specialite,

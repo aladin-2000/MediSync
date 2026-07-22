@@ -16,5 +16,9 @@ public interface MedecinRepository extends JpaRepository<Medecin, String> {
 
     List<Medecin> findBySpecialiteContainingIgnoreCase(String specialite);
 
+    /** Recherche par nom + spécialité (recherche partielle) parmi une liste d'ids donnée. */
+    List<Medecin> findByIdInAndNomContainingIgnoreCaseAndSpecialiteContainingIgnoreCase(
+            List<String> ids, String nom, String specialite);
+
     boolean existsByUserId(String userId);
 }
