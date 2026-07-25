@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.String;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -63,6 +64,20 @@ public class RendezVousServiceImpl implements RendezVousService {
     @Transactional(readOnly = true)
     public List<RendezVous> getByDelegue(String delegueId) {
         return rendezVousRepository.findByDelegueIdAndDeletedAtIsNull(delegueId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<RendezVous> getByDelegueEtJour(String delegueId, LocalDate date) {
+        return rendezVousRepository.findByDelegueIdAndCreneau_DateAndDeletedAtIsNull(delegueId, date);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<RendezVous> getByDelegueEtSemaine(String delegueId, LocalDate lundiDeLaSemaine) {
+        LocalDate dimanche = lundiDeLaSemaine.plusDays(6);
+        return rendezVousRepository.findByDelegueIdAndCreneau_DateBetweenAndDeletedAtIsNull(
+                delegueId, lundiDeLaSemaine, dimanche);
     }
 
     @Override

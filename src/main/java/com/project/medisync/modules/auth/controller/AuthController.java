@@ -1,6 +1,7 @@
 package com.project.medisync.modules.auth.controller;
 
 import com.project.medisync.modules.auth.dto.AuthResponse;
+import com.project.medisync.modules.auth.dto.ChangePasswordRequest;
 import com.project.medisync.modules.auth.dto.LoginRequest;
 import com.project.medisync.modules.auth.dto.UserResponse;
 import com.project.medisync.modules.auth.entity.User;
@@ -65,5 +66,27 @@ public class AuthController {
         String userId = authentication.getName();
         User user = userService.getById(userId);
         return ResponseEntity.ok(ApiResponse.ok(UserResponse.from(user)));
+    }
+
+    /**
+     * Change le mot de passe de l'utilisateur connecté.
+     * À appeler obligatoirement après le premier login (tant que mustChangePassword=true).
+     */
+    @PutMapping("/changer-mot-de-passe")
+    public ResponseEntity<ApiResponse<Void>> changerMotDePasse(
+            Authentication authentication,
+            @Valid @RequestBody ChangePasswordRequest req) {
+
+        User user = userService.getById(authentication.getName());
+
+        if (!passwordEncoder.matches(req.getCurrentPassword(), user.getPasswordHash())) {
+            throw new BusinessException("Mot de passe actuel incorrect.");
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(req.getNewPassword()));
+        user.setMustChangePassword(false);
+        userService.save(user);
+
+        return ResponseEntity.ok(ApiResponse.ok("Mot de passe changé avec succès.", null));
     }
 }

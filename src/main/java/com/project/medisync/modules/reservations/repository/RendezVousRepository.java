@@ -17,6 +17,13 @@ public interface RendezVousRepository extends JpaRepository<RendezVous, String> 
 
     List<RendezVous> findByDelegueIdAndDeletedAtIsNull(String delegueId);
 
+    /** RDV d'un délégué pour un jour donné (via la date du créneau lié). */
+    List<RendezVous> findByDelegueIdAndCreneau_DateAndDeletedAtIsNull(String delegueId, java.time.LocalDate date);
+
+    /** RDV d'un délégué sur une période donnée (via la date du créneau lié). */
+    List<RendezVous> findByDelegueIdAndCreneau_DateBetweenAndDeletedAtIsNull(
+            String delegueId, java.time.LocalDate dateDebut, java.time.LocalDate dateFin);
+
     List<RendezVous> findByMedecinIdAndDeletedAtIsNull(String medecinId);
 
     /** Vérifie qu'un créneau n'est pas déjà réservé. */

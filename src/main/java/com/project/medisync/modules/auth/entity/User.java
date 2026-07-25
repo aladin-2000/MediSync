@@ -43,6 +43,11 @@ public class User {
     @Builder.Default
     private Boolean isActive = true;
 
+    /** Vrai tant que l'utilisateur n'a pas changé son mot de passe initial (donné par l'admin). */
+    @Column(name = "must_change_password", nullable = false)
+    @Builder.Default
+    private Boolean mustChangePassword = true;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

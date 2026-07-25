@@ -7,10 +7,12 @@ import com.project.medisync.modules.reservations.service.RendezVousService;
 import com.project.medisync.shared.dto.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -73,6 +75,38 @@ public class RendezVousController {
                 .toList();
         
         return ResponseEntity.ok(ApiResponse.ok("Rendez-vous du délégué récupérés.", list));
+    }
+
+    /**
+     * Récupère les rendez-vous d'un délégué pour un jour donné.
+     */
+    @GetMapping("/delegue/{delegueId}/jour")
+    public ResponseEntity<ApiResponse<List<RendezVousResponse>>> getByDelegueEtJour(
+            @PathVariable String delegueId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+
+        List<RendezVousResponse> list = rendezVousService.getByDelegueEtJour(delegueId, date)
+                .stream().map(RendezVousResponse::from).toList();
+
+        return ResponseEntity.ok(ApiResponse.ok("Rendez-vous du " + date + " récupérés.", list));
+    }
+
+    /**
+     * Récupère les rendez-vous d'un délégué pour la semaine (lundi → dimanche)
+     * contenant la date fournie. Si aucune date n'est fournie, utilise la semaine en cours.
+     */
+    @GetMapping("/delegue/{delegueId}/semaine")
+    public ResponseEntity<ApiResponse<List<RendezVousResponse>>> getByDelegueEtSemaine(
+            @PathVariable String delegueId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate semaine) {
+
+        LocalDate lundi = (semaine != null ? semaine : LocalDate.now())
+                .with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY));
+
+        List<RendezVousResponse> list = rendezVousService.getByDelegueEtSemaine(delegueId, lundi)
+                .stream().map(RendezVousResponse::from).toList();
+
+        return ResponseEntity.ok(ApiResponse.ok("Rendez-vous de la semaine du " + lundi + " récupérés.", list));
     }
 
     /**

@@ -2,6 +2,7 @@ package com.project.medisync.modules.reservations.service;
 
 import com.project.medisync.modules.reservations.entity.RendezVous;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -23,6 +24,12 @@ public interface RendezVousService {
     RendezVous getById(String id);
 
     List<RendezVous> getByDelegue(String delegueId);
+
+    /** RDV d'un délégué pour un jour donné. */
+    List<RendezVous> getByDelegueEtJour(String delegueId, LocalDate date);
+
+    /** RDV d'un délégué pour la semaine (lundi → dimanche) contenant lundiDeLaSemaine. */
+    List<RendezVous> getByDelegueEtSemaine(String delegueId, LocalDate lundiDeLaSemaine);
 
     List<RendezVous> getByMedecin(String medecinId);
 

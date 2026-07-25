@@ -51,6 +51,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/medecins/creneaux/**").hasAnyRole("ADMIN", "MEDECIN")
                         .requestMatchers(HttpMethod.DELETE, "/medecins/creneaux/**").hasAnyRole("ADMIN", "MEDECIN")
 
+                        // Rendez-vous — réservé au délégué, sauf l'annulation par le médecin
+                        .requestMatchers(HttpMethod.PATCH, "/api/rendezvous/*/annuler-medecin").hasRole("MEDECIN")
+                        .requestMatchers("/api/rendezvous/**").hasRole("DELEGUE")
+
                         // Tout le reste : il faut juste être connecté
                         .anyRequest().authenticated()
                 )

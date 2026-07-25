@@ -144,6 +144,7 @@ public class UserController {
                     .email(req.getEmail())
                     .passwordHash(passwordEncoder.encode(req.getPassword()))
                     .role(req.getRole())
+                    .mustChangePassword(false) // comptes de démo/test, pas de vrai onboarding admin
                     .build();
 
             userService.save(user);

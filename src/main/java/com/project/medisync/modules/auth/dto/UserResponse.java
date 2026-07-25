@@ -15,6 +15,7 @@ public class UserResponse {
     private String        email;
     private RoleEnum      role;
     private Boolean       isActive;
+    private Boolean       mustChangePassword;
     private LocalDateTime createdAt;
 
     public static UserResponse from(User user) {
@@ -23,6 +24,7 @@ public class UserResponse {
                 .email(user.getEmail())
                 .role(user.getRole())
                 .isActive(user.getIsActive())
+                .mustChangePassword(user.getMustChangePassword())
                 .createdAt(user.getCreatedAt())
                 .build();
     }
