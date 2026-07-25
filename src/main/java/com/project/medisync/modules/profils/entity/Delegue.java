@@ -30,8 +30,9 @@ public class Delegue {
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
+    /** Optionnel : un délégué peut ne pas être encore rattaché à un laboratoire. */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "laboratoire_id", nullable = false)
+    @JoinColumn(name = "laboratoire_id", nullable = true)
     private Laboratoire laboratoire;
 
     @Column(name = "nom", nullable = false, length = 100)

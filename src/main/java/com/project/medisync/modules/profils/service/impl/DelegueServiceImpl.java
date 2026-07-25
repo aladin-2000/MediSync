@@ -36,7 +36,7 @@ public class DelegueServiceImpl implements DelegueService {
 
         Delegue delegue = Delegue.builder()
                 .user(userService.getById(userId))
-                .laboratoire(laboratoireService.getById(laboratoireId))
+                .laboratoire(laboratoireId != null ? laboratoireService.getById(laboratoireId) : null)
                 .nom(nom)
                 .prenom(prenom)
                 .telephone(telephone)

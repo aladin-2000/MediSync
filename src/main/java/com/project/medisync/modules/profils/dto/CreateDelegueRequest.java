@@ -15,7 +15,7 @@ public class CreateDelegueRequest {
     @NotNull(message = "L'identifiant utilisateur est obligatoire.")
     private String userId;
 
-    @NotNull(message = "L'identifiant du laboratoire est obligatoire.")
+    /** Optionnel : un délégué peut être créé sans laboratoire rattaché. */
     private String laboratoireId;
 
     @NotBlank(message = "Le nom est obligatoire.")

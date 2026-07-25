@@ -24,7 +24,7 @@ public class DelegueResponse {
         return DelegueResponse.builder()
                 .id(delegue.getId())
                 .userId(delegue.getUser().getId())
-                .laboratoireId(delegue.getLaboratoire().getId())
+                .laboratoireId(delegue.getLaboratoire() != null ? delegue.getLaboratoire().getId() : null)
                 .nom(delegue.getNom())
                 .prenom(delegue.getPrenom())
                 .telephone(delegue.getTelephone())
