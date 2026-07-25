@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -44,14 +43,14 @@ public class PaiementServiceImpl implements PaiementService {
     @Override
     @Transactional(readOnly = true)
     public Paiement getById(String id) {
-        return paiementRepository.findByIdAndDeletedAtIsNull(id)
+        return paiementRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Paiement", id));
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<Paiement> getByLaboratoire(String laboratoireId) {
-        return paiementRepository.findByLaboratoireIdAndDeletedAtIsNull(laboratoireId);
+        return paiementRepository.findByLaboratoireId(laboratoireId);
     }
 
     @Override
@@ -65,8 +64,9 @@ public class PaiementServiceImpl implements PaiementService {
     @Override
     @Transactional
     public void delete(String id) {
-        Paiement paiement = getById(id);
-        paiement.setDeletedAt(LocalDateTime.now());
-        paiementRepository.save(paiement);
+        if (!paiementRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Paiement", id);
+        }
+        paiementRepository.deleteById(id);
     }
 }

@@ -10,13 +10,9 @@ import java.util.Optional;
 @Repository
 public interface DelegueRepository extends JpaRepository<Delegue, String> {
 
-    Optional<Delegue> findByIdAndDeletedAtIsNull(String id);
+    List<Delegue> findByLaboratoireId(String laboratoireId);
 
-    List<Delegue> findAllByDeletedAtIsNull();
+    Optional<Delegue> findByUserId(String userId);
 
-    List<Delegue> findByLaboratoireIdAndDeletedAtIsNull(String laboratoireId);
-
-    Optional<Delegue> findByUserIdAndDeletedAtIsNull(String userId);
-
-    boolean existsByUserIdAndDeletedAtIsNull(String userId);
+    boolean existsByUserId(String userId);
 }

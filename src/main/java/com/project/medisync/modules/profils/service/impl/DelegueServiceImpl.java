@@ -12,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -31,7 +30,7 @@ public class DelegueServiceImpl implements DelegueService {
         if (!userService.existsById(userId)) {
             throw new ResourceNotFoundException("Utilisateur", userId);
         }
-        if (delegueRepository.existsByUserIdAndDeletedAtIsNull(userId)) {
+        if (delegueRepository.existsByUserId(userId)) {
             throw new BusinessException("Un profil délégué existe déjà pour cet utilisateur.");
         }
 
@@ -49,27 +48,27 @@ public class DelegueServiceImpl implements DelegueService {
     @Override
     @Transactional(readOnly = true)
     public Delegue getById(String id) {
-        return delegueRepository.findByIdAndDeletedAtIsNull(id)
+        return delegueRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Délégué", id));
     }
 
     @Override
     @Transactional(readOnly = true)
     public Delegue getByUserId(String userId) {
-        return delegueRepository.findByUserIdAndDeletedAtIsNull(userId)
+        return delegueRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Délégué pour l'utilisateur", userId));
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<Delegue> getAll() {
-        return delegueRepository.findAllByDeletedAtIsNull();
+        return delegueRepository.findAll();
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<Delegue> getByLaboratoire(String laboratoireId) {
-        return delegueRepository.findByLaboratoireIdAndDeletedAtIsNull(laboratoireId);
+        return delegueRepository.findByLaboratoireId(laboratoireId);
     }
 
     @Override
@@ -96,9 +95,10 @@ public class DelegueServiceImpl implements DelegueService {
     @Override
     @Transactional
     public void delete(String id) {
-        Delegue delegue = getById(id);
-        delegue.setDeletedAt(LocalDateTime.now());
-        delegueRepository.save(delegue);
-        log.info("[Profils] Délégué {} soft-deleted.", id);
+        if (!delegueRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Délégué", id);
+        }
+        delegueRepository.deleteById(id);
+        log.info("[Profils] Délégué {} supprimé.", id);
     }
 }

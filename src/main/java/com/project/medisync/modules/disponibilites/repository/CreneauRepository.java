@@ -64,21 +64,4 @@ public interface CreneauRepository extends JpaRepository<Creneau, String> {
             @Param("heureDebut") java.time.LocalTime heureDebut,
             @Param("heureFin")   java.time.LocalTime heureFin
     );
-
-    /**
-     * Soft-delete en masse des créneaux DISPONIBLES futurs issus d'une règle de récurrence.
-     * Appelé quand le médecin désactive ou supprime une DisponibiliteHebdomadaire.
-     */
-/*    @Modifying
-    @Query("""
-            UPDATE Creneau c SET c.deletedAt = CURRENT_TIMESTAMP
-            WHERE c.disponibiliteHebdoId = :disponibiliteHebdoId
-              AND c.statut               = 'DISPONIBLE'
-              AND c.date                 >= :aujourdhui
-              AND c.deletedAt            IS NULL
-            """)
-    void softDeleteFutursDisponibles(
-            @Param("disponibiliteHebdoId") String disponibiliteHebdoId,
-            @Param("aujourdhui")           LocalDate aujourdhui
-    );*/
 }

@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -32,7 +31,7 @@ public class LaboratoireServiceImpl implements LaboratoireService {
         if (!userService.existsById(userId)) {
             throw new ResourceNotFoundException("Utilisateur", userId);
         }
-        if (laboratoireRepository.existsByUserIdAndDeletedAtIsNull(userId)) {
+        if (laboratoireRepository.existsByUserId(userId)) {
             throw new BusinessException("Un laboratoire est déjà associé à cet utilisateur.");
         }
         if (dateFin.isBefore(dateDebut)) {
@@ -54,14 +53,14 @@ public class LaboratoireServiceImpl implements LaboratoireService {
     @Override
     @Transactional(readOnly = true)
     public Laboratoire getById(String id) {
-        return laboratoireRepository.findByIdAndDeletedAtIsNull(id)
+        return laboratoireRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Laboratoire", id));
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<Laboratoire> getAll() {
-        return laboratoireRepository.findAllByDeletedAtIsNull();
+        return laboratoireRepository.findAll();
     }
 
     @Override
@@ -94,9 +93,10 @@ public class LaboratoireServiceImpl implements LaboratoireService {
     @Override
     @Transactional
     public void delete(String id) {
-        Laboratoire labo = getById(id);
-        labo.setDeletedAt(LocalDateTime.now());
-        laboratoireRepository.save(labo);
-        log.info("[Profils] Laboratoire {} soft-deleted.", id);
+        if (!laboratoireRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Laboratoire", id);
+        }
+        laboratoireRepository.deleteById(id);
+        log.info("[Profils] Laboratoire {} supprimé.", id);
     }
 }

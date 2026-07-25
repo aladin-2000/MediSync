@@ -6,14 +6,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface PaiementRepository extends JpaRepository<Paiement, String> {
 
-    Optional<Paiement> findByIdAndDeletedAtIsNull(String id);
+    List<Paiement> findByLaboratoireId(String laboratoireId);
 
-    List<Paiement> findByLaboratoireIdAndDeletedAtIsNull(String laboratoireId);
-
-    List<Paiement> findByLaboratoireIdAndStatutAndDeletedAtIsNull(String laboratoireId, StatutPaiementEnum statut);
+    List<Paiement> findByLaboratoireIdAndStatut(String laboratoireId, StatutPaiementEnum statut);
 }

@@ -34,7 +34,7 @@ public class RendezVousServiceImpl implements RendezVousService {
     @Transactional
     public RendezVous reserver(String creneauId, String delegueId, String medecinId) {
         // 1. Créneau déjà réservé ?
-        if (rendezVousRepository.existsByCreneauIdAndStatutNotAndDeletedAtIsNull(creneauId, StatutRendezVousEnum.ANNULE)) {
+        if (rendezVousRepository.existsByCreneauIdAndStatutNot(creneauId, StatutRendezVousEnum.ANNULE)) {
             throw new BusinessException("Ce créneau est déjà réservé.");
         }
         // 2. Délégué déjà occupé à cette heure ?
@@ -56,34 +56,34 @@ public class RendezVousServiceImpl implements RendezVousService {
     @Override
     @Transactional(readOnly = true)
     public RendezVous getById(String id) {
-        return rendezVousRepository.findByIdAndDeletedAtIsNull(id)
+        return rendezVousRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Rendez-vous", id));
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<RendezVous> getByDelegue(String delegueId) {
-        return rendezVousRepository.findByDelegueIdAndDeletedAtIsNull(delegueId);
+        return rendezVousRepository.findByDelegueId(delegueId);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<RendezVous> getByDelegueEtJour(String delegueId, LocalDate date) {
-        return rendezVousRepository.findByDelegueIdAndCreneau_DateAndDeletedAtIsNull(delegueId, date);
+        return rendezVousRepository.findByDelegueIdAndCreneau_Date(delegueId, date);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<RendezVous> getByDelegueEtSemaine(String delegueId, LocalDate lundiDeLaSemaine) {
         LocalDate dimanche = lundiDeLaSemaine.plusDays(6);
-        return rendezVousRepository.findByDelegueIdAndCreneau_DateBetweenAndDeletedAtIsNull(
+        return rendezVousRepository.findByDelegueIdAndCreneau_DateBetween(
                 delegueId, lundiDeLaSemaine, dimanche);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<RendezVous> getByMedecin(String medecinId) {
-        return rendezVousRepository.findByMedecinIdAndDeletedAtIsNull(medecinId);
+        return rendezVousRepository.findByMedecinId(medecinId);
     }
 
     @Override

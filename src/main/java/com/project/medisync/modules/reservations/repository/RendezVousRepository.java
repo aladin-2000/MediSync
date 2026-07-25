@@ -8,26 +8,23 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface RendezVousRepository extends JpaRepository<RendezVous, String> {
 
-    Optional<RendezVous> findByIdAndDeletedAtIsNull(String id);
-
-    List<RendezVous> findByDelegueIdAndDeletedAtIsNull(String delegueId);
+    List<RendezVous> findByDelegueId(String delegueId);
 
     /** RDV d'un délégué pour un jour donné (via la date du créneau lié). */
-    List<RendezVous> findByDelegueIdAndCreneau_DateAndDeletedAtIsNull(String delegueId, java.time.LocalDate date);
+    List<RendezVous> findByDelegueIdAndCreneau_Date(String delegueId, java.time.LocalDate date);
 
     /** RDV d'un délégué sur une période donnée (via la date du créneau lié). */
-    List<RendezVous> findByDelegueIdAndCreneau_DateBetweenAndDeletedAtIsNull(
+    List<RendezVous> findByDelegueIdAndCreneau_DateBetween(
             String delegueId, java.time.LocalDate dateDebut, java.time.LocalDate dateFin);
 
-    List<RendezVous> findByMedecinIdAndDeletedAtIsNull(String medecinId);
+    List<RendezVous> findByMedecinId(String medecinId);
 
     /** Vérifie qu'un créneau n'est pas déjà réservé. */
-    boolean existsByCreneauIdAndStatutNotAndDeletedAtIsNull(String creneauId, StatutRendezVousEnum statut);
+    boolean existsByCreneauIdAndStatutNot(String creneauId, StatutRendezVousEnum statut);
 
     /**
      * Vérifie le chevauchement horaire pour un délégué :
@@ -39,7 +36,6 @@ public interface RendezVousRepository extends JpaRepository<RendezVous, String> 
               AND r.creneau.date = (SELECT c.date FROM Creneau c WHERE c.id = :creneauId)
               AND r.creneau.heureDebut = (SELECT c.heureDebut FROM Creneau c WHERE c.id = :creneauId)
               AND r.statut <> 'ANNULE'
-              AND r.deletedAt IS NULL
             """)
     boolean existsByDelegueConflict(@Param("delegueId") String delegueId,
                                     @Param("creneauId") String creneauId);

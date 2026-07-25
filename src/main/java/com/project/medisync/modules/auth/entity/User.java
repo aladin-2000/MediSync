@@ -10,9 +10,6 @@ import java.util.UUID;
 /**
  * Utilisateur du système MediSync.
  * Sert de base d'authentification pour tous les profils (Médecin, Délégué, Laboratoire).
- *
- * <p>Soft delete : on ne supprime jamais physiquement un utilisateur,
- * on renseigne {@code deletedAt}.</p>
  */
 @Entity
 @Table(name = "users",
