@@ -62,6 +62,14 @@ public class DelegueController {
     }
 
     /**
+     * Récupère le profil délégué (et donc son delegueId) à partir du userId du compte connecté.
+     */
+    @GetMapping("/by-user/{userId}")
+    public ResponseEntity<ApiResponse<DelegueResponse>> getByUserId(@PathVariable String userId) {
+        return ResponseEntity.ok(ApiResponse.ok(DelegueResponse.from(delegueService.getByUserId(userId))));
+    }
+
+    /**
      * Récupère la liste des délégués médicaux rattachés à un laboratoire spécifique.
      *
      * @param laboratoireId L'identifiant unique String du laboratoire cible

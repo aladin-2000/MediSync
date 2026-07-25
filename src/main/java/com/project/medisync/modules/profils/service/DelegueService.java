@@ -12,6 +12,9 @@ public interface DelegueService {
 
     Delegue getById(String id);
 
+    /** Récupère le profil délégué associé à un compte utilisateur. */
+    Delegue getByUserId(String userId);
+
     List<Delegue> getAll();
 
     List<Delegue> getByLaboratoire(String laboratoireId);

@@ -55,6 +55,13 @@ public class DelegueServiceImpl implements DelegueService {
 
     @Override
     @Transactional(readOnly = true)
+    public Delegue getByUserId(String userId) {
+        return delegueRepository.findByUserIdAndDeletedAtIsNull(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Délégué pour l'utilisateur", userId));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<Delegue> getAll() {
         return delegueRepository.findAllByDeletedAtIsNull();
     }
