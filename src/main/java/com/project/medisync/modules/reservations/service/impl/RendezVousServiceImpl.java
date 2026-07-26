@@ -42,10 +42,13 @@ public class RendezVousServiceImpl implements RendezVousService {
             throw new BusinessException("Vous avez déjà un rendez-vous à ce même créneau horaire.");
         }
 
+        var delegue = delegueService.getById(delegueId);
+
         RendezVous rdv = RendezVous.builder()
                 .creneau(creneauService.getById(creneauId))
-                .delegue(delegueService.getById(delegueId))
+                .delegue(delegue)
                 .medecin(medecinService.getById(medecinId))
+                .laboratoire(delegue.getLaboratoire())
                 .statut(StatutRendezVousEnum.CONFIRME)
                 .build();
 

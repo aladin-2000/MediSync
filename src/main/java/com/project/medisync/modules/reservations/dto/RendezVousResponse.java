@@ -21,6 +21,9 @@ public record RendezVousResponse(
         /** Identifiant du médecin. */
         String medecinId,
 
+        /** Snapshot immutable du laboratoire du délégué au moment de la réservation (facturation). */
+        String laboratoireId,
+
         /** Statut actuel du rendez-vous (CONFIRME, ANNULE, REALISE, ABSENT). */
         StatutRendezVousEnum statut,
 
@@ -45,6 +48,7 @@ public record RendezVousResponse(
                 rdv.getCreneau().getId(),
                 rdv.getDelegue().getId(),
                 rdv.getMedecin().getId(),
+                rdv.getLaboratoire() != null ? rdv.getLaboratoire().getId() : null,
                 rdv.getStatut(),
                 rdv.getAnnulePar(),
                 rdv.getMotifAnnulation(),

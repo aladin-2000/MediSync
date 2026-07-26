@@ -2,6 +2,7 @@ package com.project.medisync.modules.reservations.entity;
 
 import com.project.medisync.modules.disponibilites.entity.Creneau;
 import com.project.medisync.modules.profils.entity.Delegue;
+import com.project.medisync.modules.profils.entity.Laboratoire;
 import com.project.medisync.modules.profils.entity.Medecin;
 import jakarta.persistence.*;
 import lombok.*;
@@ -47,6 +48,15 @@ public class RendezVous {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medecin_id", nullable = false)
     private Medecin medecin;
+
+    /**
+     * Snapshot immutable du laboratoire du délégué au moment de la réservation.
+     * Sert de base à la facturation par laboratoire ; ne doit jamais être modifié
+     * après création, même si le délégué change ensuite de laboratoire.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "laboratoire_id", updatable = false)
+    private Laboratoire laboratoire;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "statut", nullable = false, length = 20)
