@@ -103,8 +103,8 @@ public class MedecinController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime heureDebut,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime heureFin) {
 
-        LocalTime debut = heureDebut != null ? heureDebut : LocalTime.MIN;
-        LocalTime fin   = heureFin   != null ? heureFin   : LocalTime.MAX;
+        LocalTime debut = heureDebut != null ? heureDebut : LocalTime.of(0, 0);
+        LocalTime fin   = heureFin   != null ? heureFin   : LocalTime.of(23, 0);
 
         List<String> medecinIds = creneauService.getMedecinIdsAvecCreneauxLibres(date, debut, fin);
         List<MedecinResponse> list = medecinService.getByIds(medecinIds)
