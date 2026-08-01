@@ -128,6 +128,20 @@ public class RendezVousController {
     }
 
     /**
+     * Récupère les rendez-vous d'un médecin pour un jour donné.
+     */
+    @GetMapping("/medecin/{medecinId}/jour")
+    public ResponseEntity<ApiResponse<List<RendezVousResponse>>> getByMedecinEtJour(
+            @PathVariable String medecinId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+
+        List<RendezVousResponse> list = rendezVousService.getByMedecinEtJour(medecinId, date)
+                .stream().map(RendezVousResponse::from).toList();
+
+        return ResponseEntity.ok(ApiResponse.ok("Rendez-vous du " + date + " récupérés.", list));
+    }
+
+    /**
      * Récupère les rendez-vous d'un médecin pour la semaine (lundi → dimanche)
      * contenant la date fournie. Si aucune date n'est fournie, utilise la semaine en cours.
      */

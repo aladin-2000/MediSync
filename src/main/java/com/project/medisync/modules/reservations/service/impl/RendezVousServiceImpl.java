@@ -91,6 +91,12 @@ public class RendezVousServiceImpl implements RendezVousService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<RendezVous> getByMedecinEtJour(String medecinId, LocalDate date) {
+        return rendezVousRepository.findByMedecinIdAndCreneau_Date(medecinId, date);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<RendezVous> getByMedecinEtSemaine(String medecinId, LocalDate lundiDeLaSemaine) {
         LocalDate dimanche = lundiDeLaSemaine.plusDays(6);
         return rendezVousRepository.findByMedecinIdAndCreneau_DateBetween(

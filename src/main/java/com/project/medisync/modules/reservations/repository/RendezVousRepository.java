@@ -23,6 +23,9 @@ public interface RendezVousRepository extends JpaRepository<RendezVous, String> 
 
     List<RendezVous> findByMedecinId(String medecinId);
 
+    /** RDV d'un médecin pour un jour donné (via la date du créneau lié). */
+    List<RendezVous> findByMedecinIdAndCreneau_Date(String medecinId, java.time.LocalDate date);
+
     /** RDV d'un médecin sur une période donnée (via la date du créneau lié). */
     List<RendezVous> findByMedecinIdAndCreneau_DateBetween(
             String medecinId, java.time.LocalDate dateDebut, java.time.LocalDate dateFin);
