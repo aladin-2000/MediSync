@@ -33,6 +33,9 @@ public interface RendezVousService {
 
     List<RendezVous> getByMedecin(String medecinId);
 
+    /** RDV d'un médecin pour la semaine (lundi → dimanche) contenant lundiDeLaSemaine. */
+    List<RendezVous> getByMedecinEtSemaine(String medecinId, LocalDate lundiDeLaSemaine);
+
     /** Annulation par le délégué. */
     RendezVous annulerParDelegue(String rendezVousId);
 

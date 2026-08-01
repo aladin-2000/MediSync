@@ -128,6 +128,24 @@ public class RendezVousController {
     }
 
     /**
+     * Récupère les rendez-vous d'un médecin pour la semaine (lundi → dimanche)
+     * contenant la date fournie. Si aucune date n'est fournie, utilise la semaine en cours.
+     */
+    @GetMapping("/medecin/{medecinId}/semaine")
+    public ResponseEntity<ApiResponse<List<RendezVousResponse>>> getByMedecinEtSemaine(
+            @PathVariable String medecinId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate semaine) {
+
+        LocalDate lundi = (semaine != null ? semaine : LocalDate.now())
+                .with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY));
+
+        List<RendezVousResponse> list = rendezVousService.getByMedecinEtSemaine(medecinId, lundi)
+                .stream().map(RendezVousResponse::from).toList();
+
+        return ResponseEntity.ok(ApiResponse.ok("Rendez-vous de la semaine du " + lundi + " récupérés.", list));
+    }
+
+    /**
      * Annule un rendez-vous à l'initiative du délégué médical.
      *
      * @param id L'identifiant unique String du rendez-vous à annuler.
