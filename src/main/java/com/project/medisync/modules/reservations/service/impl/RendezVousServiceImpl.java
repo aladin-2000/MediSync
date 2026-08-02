@@ -6,6 +6,7 @@ import com.project.medisync.modules.profils.service.MedecinService;
 import com.project.medisync.modules.reservations.entity.*;
 import com.project.medisync.modules.reservations.repository.PropositionRemplacementRepository;
 import com.project.medisync.modules.reservations.repository.RendezVousRepository;
+import com.project.medisync.modules.reservations.repository.VisiteRepository;
 import com.project.medisync.modules.reservations.service.RendezVousService;
 import com.project.medisync.shared.exception.BusinessException;
 import com.project.medisync.shared.exception.ResourceNotFoundException;
@@ -26,6 +27,7 @@ public class RendezVousServiceImpl implements RendezVousService {
 
     private final RendezVousRepository             rendezVousRepository;
     private final PropositionRemplacementRepository propositionRepository;
+    private final VisiteRepository                 visiteRepository;
     private final CreneauService                   creneauService;
     private final DelegueService                   delegueService;
     private final MedecinService                   medecinService;
@@ -107,6 +109,7 @@ public class RendezVousServiceImpl implements RendezVousService {
     @Transactional
     public RendezVous annulerParDelegue(String rendezVousId) {
         RendezVous rdv = getById(rendezVousId);
+        verifierEncoreModifiable(rdv);
         rdv.setStatut(StatutRendezVousEnum.ANNULE);
         rdv.setAnnulePar(AnnuleParEnum.DELEGUE);
         creneauService.marquerDisponible(rdv.getCreneau().getId());
@@ -120,6 +123,7 @@ public class RendezVousServiceImpl implements RendezVousService {
             throw new BusinessException("Le motif d'annulation est obligatoire lorsque c'est le médecin qui annule.");
         }
         RendezVous rdv = getById(rendezVousId);
+        verifierEncoreModifiable(rdv);
         rdv.setStatut(StatutRendezVousEnum.ANNULE);
         rdv.setAnnulePar(AnnuleParEnum.MEDECIN);
         rdv.setMotifAnnulation(motifAnnulation);
@@ -141,9 +145,33 @@ public class RendezVousServiceImpl implements RendezVousService {
 
     @Override
     @Transactional
-    public RendezVous marquerRealise(String rendezVousId) {
+    public RendezVous realiserParDelegue(String rendezVousId) {
         RendezVous rdv = getById(rendezVousId);
-        rdv.setStatut(StatutRendezVousEnum.REALISE);
+        verifierEncoreModifiable(rdv);
+        rdv.setRealiseParDelegue(true);
+        return confirmerSiLesDeuxPartiesOntValide(rdv);
+    }
+
+    @Override
+    @Transactional
+    public RendezVous realiserParMedecin(String rendezVousId) {
+        RendezVous rdv = getById(rendezVousId);
+        verifierEncoreModifiable(rdv);
+        rdv.setRealiseParMedecin(true);
+        return confirmerSiLesDeuxPartiesOntValide(rdv);
+    }
+
+    /** Si les deux parties ont confirmé, passe le RDV à REALISE et crée la Visite (preuve de facturation). */
+    private RendezVous confirmerSiLesDeuxPartiesOntValide(RendezVous rdv) {
+        if (rdv.getRealiseParDelegue() && rdv.getRealiseParMedecin()) {
+            rdv.setStatut(StatutRendezVousEnum.REALISE);
+            rendezVousRepository.save(rdv);
+
+            Visite visite = Visite.builder().rendezVous(rdv).build();
+            visiteRepository.save(visite);
+            log.info("[Réservations] RDV {} réalisé (double confirmation) — Visite créée.", rdv.getId());
+            return rdv;
+        }
         return rendezVousRepository.save(rdv);
     }
 
@@ -151,7 +179,19 @@ public class RendezVousServiceImpl implements RendezVousService {
     @Transactional
     public RendezVous marquerAbsent(String rendezVousId) {
         RendezVous rdv = getById(rendezVousId);
+        verifierEncoreModifiable(rdv);
         rdv.setStatut(StatutRendezVousEnum.ABSENT);
         return rendezVousRepository.save(rdv);
+    }
+
+    /**
+     * Une fois le RDV REALISE, ANNULE ou ABSENT, plus aucune action ne doit pouvoir le faire
+     * changer d'état (protège la Visite/facturation d'une annulation a posteriori).
+     */
+    private void verifierEncoreModifiable(RendezVous rdv) {
+        if (rdv.getStatut() != StatutRendezVousEnum.CONFIRME) {
+            throw new BusinessException(
+                    "Ce rendez-vous ne peut plus être modifié (statut actuel : " + rdv.getStatut() + ").");
+        }
     }
 }

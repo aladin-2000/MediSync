@@ -45,8 +45,17 @@ public interface RendezVousService {
     /** Annulation par le médecin — motif obligatoire, déclenche une PropositionRemplacement. */
     RendezVous annulerParMedecin(String rendezVousId, String motifAnnulation);
 
-    /** Marque un rendez-vous comme réalisé. */
-    RendezVous marquerRealise(String rendezVousId);
+    /**
+     * Confirmation du délégué que le RDV a été réalisé.
+     * Le statut ne passe à REALISE (et une Visite n'est créée) que si le médecin a aussi confirmé.
+     */
+    RendezVous realiserParDelegue(String rendezVousId);
+
+    /**
+     * Confirmation du médecin que le RDV a été réalisé.
+     * Le statut ne passe à REALISE (et une Visite n'est créée) que si le délégué a aussi confirmé.
+     */
+    RendezVous realiserParMedecin(String rendezVousId);
 
     /** Marque le délégué comme absent. */
     RendezVous marquerAbsent(String rendezVousId);

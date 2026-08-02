@@ -190,17 +190,39 @@ public class RendezVousController {
     }
 
     /**
-     * Marque un rendez-vous comme réalisé.
+     * Confirmation du délégué que le rendez-vous a été réalisé.
+     * Le statut ne passe à REALISE que si le médecin a aussi confirmé.
      *
      * @param id L'identifiant unique String du rendez-vous.
      * @return Les détails du rendez-vous mis à jour.
      */
-    @PatchMapping("/{id}/realise")
-    public ResponseEntity<ApiResponse<RendezVousResponse>> marquerRealise(
+    @PatchMapping("/{id}/realise-delegue")
+    public ResponseEntity<ApiResponse<RendezVousResponse>> realiserParDelegue(
             @PathVariable String id) {
-        
-        var rdv = rendezVousService.marquerRealise(id);
-        return ResponseEntity.ok(ApiResponse.ok("Rendez-vous marqué comme réalisé.", RendezVousResponse.from(rdv)));
+
+        var rdv = rendezVousService.realiserParDelegue(id);
+        String message = rdv.getStatut().name().equals("REALISE")
+                ? "Rendez-vous confirmé réalisé par les deux parties."
+                : "Confirmation du délégué enregistrée, en attente de la confirmation du médecin.";
+        return ResponseEntity.ok(ApiResponse.ok(message, RendezVousResponse.from(rdv)));
+    }
+
+    /**
+     * Confirmation du médecin que le rendez-vous a été réalisé.
+     * Le statut ne passe à REALISE que si le délégué a aussi confirmé.
+     *
+     * @param id L'identifiant unique String du rendez-vous.
+     * @return Les détails du rendez-vous mis à jour.
+     */
+    @PatchMapping("/{id}/realise-medecin")
+    public ResponseEntity<ApiResponse<RendezVousResponse>> realiserParMedecin(
+            @PathVariable String id) {
+
+        var rdv = rendezVousService.realiserParMedecin(id);
+        String message = rdv.getStatut().name().equals("REALISE")
+                ? "Rendez-vous confirmé réalisé par les deux parties."
+                : "Confirmation du médecin enregistrée, en attente de la confirmation du délégué.";
+        return ResponseEntity.ok(ApiResponse.ok(message, RendezVousResponse.from(rdv)));
     }
 
     /**

@@ -72,6 +72,18 @@ public class RendezVous {
     @Column(name = "motif_annulation", columnDefinition = "TEXT")
     private String motifAnnulation;
 
+    /**
+     * Le statut ne passe à REALISE que lorsque les deux confirmations sont à true
+     * (évite qu'une seule partie déclare le RDV réalisé sans l'accord de l'autre).
+     */
+    @Column(name = "realise_par_delegue", nullable = false)
+    @Builder.Default
+    private Boolean realiseParDelegue = false;
+
+    @Column(name = "realise_par_medecin", nullable = false)
+    @Builder.Default
+    private Boolean realiseParMedecin = false;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

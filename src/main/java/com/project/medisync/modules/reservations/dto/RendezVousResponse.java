@@ -33,6 +33,12 @@ public record RendezVousResponse(
         /** Le motif d'annulation (renseigné si annulé par le médecin). */
         String motifAnnulation,
 
+        /** Le délégué a-t-il confirmé que le RDV a été réalisé ? */
+        Boolean realiseParDelegue,
+
+        /** Le médecin a-t-il confirmé que le RDV a été réalisé ? */
+        Boolean realiseParMedecin,
+
         /** Date et heure de création de l'enregistrement. */
         LocalDateTime createdAt
 ) {
@@ -52,6 +58,8 @@ public record RendezVousResponse(
                 rdv.getStatut(),
                 rdv.getAnnulePar(),
                 rdv.getMotifAnnulation(),
+                rdv.getRealiseParDelegue(),
+                rdv.getRealiseParMedecin(),
                 rdv.getCreatedAt()
         );
     }

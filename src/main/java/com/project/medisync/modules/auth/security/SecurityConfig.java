@@ -51,9 +51,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/medecins/creneaux/**").hasAnyRole("ADMIN", "MEDECIN")
                         .requestMatchers(HttpMethod.DELETE, "/medecins/creneaux/**").hasAnyRole("ADMIN", "MEDECIN")
 
-                        // Rendez-vous — réservé au délégué, sauf consultation et annulation côté médecin
+                        // Rendez-vous — réservé au délégué, sauf consultation et confirmation/annulation côté médecin
                         .requestMatchers(HttpMethod.PATCH, "/api/rendezvous/*/annuler-medecin").hasRole("MEDECIN")
-                        .requestMatchers(HttpMethod.PATCH, "/api/rendezvous/*/realise").hasAnyRole("DELEGUE", "MEDECIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/rendezvous/*/realise-medecin").hasRole("MEDECIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/rendezvous/*/realise-delegue").hasRole("DELEGUE")
                         .requestMatchers(HttpMethod.GET, "/api/rendezvous/medecin/**").hasAnyRole("DELEGUE", "MEDECIN")
                         .requestMatchers("/api/rendezvous/**").hasRole("DELEGUE")
 
