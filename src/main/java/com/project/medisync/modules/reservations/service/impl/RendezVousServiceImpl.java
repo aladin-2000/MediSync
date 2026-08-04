@@ -25,6 +25,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RendezVousServiceImpl implements RendezVousService {
 
+    private static final long DELAI_AUTO_VALIDATION_HEURES = 24;
+
     private final RendezVousRepository             rendezVousRepository;
     private final PropositionRemplacementRepository propositionRepository;
     private final VisiteRepository                 visiteRepository;
@@ -110,6 +112,7 @@ public class RendezVousServiceImpl implements RendezVousService {
     public RendezVous annulerParDelegue(String rendezVousId) {
         RendezVous rdv = getById(rendezVousId);
         verifierEncoreModifiable(rdv);
+        verifierPasEncoreCommence(rdv);
         rdv.setStatut(StatutRendezVousEnum.ANNULE);
         rdv.setAnnulePar(AnnuleParEnum.DELEGUE);
         creneauService.marquerDisponible(rdv.getCreneau().getId());
@@ -164,15 +167,35 @@ public class RendezVousServiceImpl implements RendezVousService {
     /** Si les deux parties ont confirmé, passe le RDV à REALISE et crée la Visite (preuve de facturation). */
     private RendezVous confirmerSiLesDeuxPartiesOntValide(RendezVous rdv) {
         if (rdv.getRealiseParDelegue() && rdv.getRealiseParMedecin()) {
-            rdv.setStatut(StatutRendezVousEnum.REALISE);
-            rendezVousRepository.save(rdv);
-
-            Visite visite = Visite.builder().rendezVous(rdv).build();
-            visiteRepository.save(visite);
-            log.info("[Réservations] RDV {} réalisé (double confirmation) — Visite créée.", rdv.getId());
-            return rdv;
+            return marquerRealiseEtCreerVisite(rdv, "réalisé (double confirmation)");
         }
         return rendezVousRepository.save(rdv);
+    }
+
+    private RendezVous marquerRealiseEtCreerVisite(RendezVous rdv, String raisonLog) {
+        rdv.setStatut(StatutRendezVousEnum.REALISE);
+        rendezVousRepository.save(rdv);
+
+        Visite visite = Visite.builder().rendezVous(rdv).build();
+        visiteRepository.save(visite);
+        log.info("[Réservations] RDV {} {} — Visite créée.", rdv.getId(), raisonLog);
+        return rdv;
+    }
+
+    @Override
+    @Transactional
+    public void resoudreConfirmationsPartiellesExpirees() {
+        List<RendezVous> enAttente = rendezVousRepository.findEnAttenteConfirmationPartielle();
+        LocalDateTime maintenant = LocalDateTime.now();
+
+        for (RendezVous rdv : enAttente) {
+            LocalDateTime debutRdv = LocalDateTime.of(rdv.getCreneau().getDate(), rdv.getCreneau().getHeureDebut());
+            if (maintenant.isAfter(debutRdv.plusHours(DELAI_AUTO_VALIDATION_HEURES))) {
+                rdv.setRealiseParDelegue(true);
+                rdv.setRealiseParMedecin(true);
+                marquerRealiseEtCreerVisite(rdv, "auto-validé après " + DELAI_AUTO_VALIDATION_HEURES + "h sans réponse de l'autre partie");
+            }
+        }
     }
 
     @Override
@@ -205,6 +228,14 @@ public class RendezVousServiceImpl implements RendezVousService {
         if (rdv.getStatut() != StatutRendezVousEnum.RESERVE) {
             throw new BusinessException(
                     "Ce rendez-vous ne peut plus être modifié (statut actuel : " + rdv.getStatut() + ").");
+        }
+    }
+
+    /** Le délégué ne peut annuler que tant que l'heure de début du rendez-vous n'est pas passée. */
+    private void verifierPasEncoreCommence(RendezVous rdv) {
+        LocalDateTime debutRdv = LocalDateTime.of(rdv.getCreneau().getDate(), rdv.getCreneau().getHeureDebut());
+        if (LocalDateTime.now().isAfter(debutRdv)) {
+            throw new BusinessException("Impossible d'annuler : l'heure du rendez-vous est déjà passée.");
         }
     }
 }

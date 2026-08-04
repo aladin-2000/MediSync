@@ -46,4 +46,15 @@ public interface RendezVousRepository extends JpaRepository<RendezVous, String> 
             """)
     boolean existsByDelegueConflict(@Param("delegueId") String delegueId,
                                     @Param("creneauId") String creneauId);
+
+    /**
+     * RDV toujours RESERVE avec une seule des deux confirmations de réalisation faite
+     * (l'autre partie n'a jamais répondu). Utilisé par le job qui auto-valide après 24h.
+     */
+    @Query("""
+            SELECT r FROM RendezVous r
+            WHERE r.statut = com.project.medisync.modules.reservations.entity.StatutRendezVousEnum.RESERVE
+              AND (r.realiseParDelegue = true OR r.realiseParMedecin = true)
+            """)
+    List<RendezVous> findEnAttenteConfirmationPartielle();
 }

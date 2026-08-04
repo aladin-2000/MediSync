@@ -62,4 +62,10 @@ public interface RendezVousService {
 
     /** Constaté par le médecin : le délégué ne s'est pas présenté. */
     RendezVous marquerAbsentDelegue(String rendezVousId);
+
+    /**
+     * Auto-valide en REALISE les RDV avec une seule confirmation, 24h après l'heure du RDV
+     * (silence de l'autre partie = présomption que la visite a bien eu lieu). Appelé par le job planifié.
+     */
+    void resoudreConfirmationsPartiellesExpirees();
 }
