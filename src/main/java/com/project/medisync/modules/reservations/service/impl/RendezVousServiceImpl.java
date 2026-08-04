@@ -185,7 +185,7 @@ public class RendezVousServiceImpl implements RendezVousService {
     @Override
     @Transactional
     public void resoudreConfirmationsPartiellesExpirees() {
-        List<RendezVous> enAttente = rendezVousRepository.findEnAttenteConfirmationPartielle();
+        List<RendezVous> enAttente = rendezVousRepository.findByStatut(StatutRendezVousEnum.RESERVE);
         LocalDateTime maintenant = LocalDateTime.now();
 
         for (RendezVous rdv : enAttente) {
@@ -193,7 +193,7 @@ public class RendezVousServiceImpl implements RendezVousService {
             if (maintenant.isAfter(debutRdv.plusHours(DELAI_AUTO_VALIDATION_HEURES))) {
                 rdv.setRealiseParDelegue(true);
                 rdv.setRealiseParMedecin(true);
-                marquerRealiseEtCreerVisite(rdv, "auto-validé après " + DELAI_AUTO_VALIDATION_HEURES + "h sans réponse de l'autre partie");
+                marquerRealiseEtCreerVisite(rdv, "auto-validé après " + DELAI_AUTO_VALIDATION_HEURES + "h sans intervention de l'un ou des deux parties (delegué et medecin )");
             }
         }
     }
