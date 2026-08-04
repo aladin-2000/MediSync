@@ -226,16 +226,30 @@ public class RendezVousController {
     }
 
     /**
-     * Marque le délégué médical comme absent pour le rendez-vous.
+     * Le délégué constate que le médecin ne s'est pas présenté au rendez-vous.
      *
      * @param id L'identifiant unique String du rendez-vous.
      * @return Les détails du rendez-vous mis à jour.
      */
-    @PatchMapping("/{id}/absent")
-    public ResponseEntity<ApiResponse<RendezVousResponse>> marquerAbsent(
+    @PatchMapping("/{id}/absent-medecin")
+    public ResponseEntity<ApiResponse<RendezVousResponse>> marquerAbsentMedecin(
             @PathVariable String id) {
-        
-        var rdv = rendezVousService.marquerAbsent(id);
+
+        var rdv = rendezVousService.marquerAbsentMedecin(id);
+        return ResponseEntity.ok(ApiResponse.ok("Rendez-vous marqué avec absence du médecin.", RendezVousResponse.from(rdv)));
+    }
+
+    /**
+     * Le médecin constate que le délégué ne s'est pas présenté au rendez-vous.
+     *
+     * @param id L'identifiant unique String du rendez-vous.
+     * @return Les détails du rendez-vous mis à jour.
+     */
+    @PatchMapping("/{id}/absent-delegue")
+    public ResponseEntity<ApiResponse<RendezVousResponse>> marquerAbsentDelegue(
+            @PathVariable String id) {
+
+        var rdv = rendezVousService.marquerAbsentDelegue(id);
         return ResponseEntity.ok(ApiResponse.ok("Rendez-vous marqué avec absence du délégué.", RendezVousResponse.from(rdv)));
     }
 }

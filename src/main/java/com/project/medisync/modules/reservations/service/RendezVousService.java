@@ -57,6 +57,9 @@ public interface RendezVousService {
      */
     RendezVous realiserParMedecin(String rendezVousId);
 
-    /** Marque le délégué comme absent. */
-    RendezVous marquerAbsent(String rendezVousId);
+    /** Constaté par le délégué : le médecin ne s'est pas présenté. */
+    RendezVous marquerAbsentMedecin(String rendezVousId);
+
+    /** Constaté par le médecin : le délégué ne s'est pas présenté. */
+    RendezVous marquerAbsentDelegue(String rendezVousId);
 }

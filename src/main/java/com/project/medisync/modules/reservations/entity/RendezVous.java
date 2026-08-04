@@ -61,7 +61,7 @@ public class RendezVous {
     @Enumerated(EnumType.STRING)
     @Column(name = "statut", nullable = false, length = 20)
     @Builder.Default
-    private StatutRendezVousEnum statut = StatutRendezVousEnum.CONFIRME;
+    private StatutRendezVousEnum statut = StatutRendezVousEnum.RESERVE;
 
     /** Renseigné uniquement si le rendez-vous a été annulé. */
     @Enumerated(EnumType.STRING)

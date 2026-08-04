@@ -51,7 +51,7 @@ public class RendezVousServiceImpl implements RendezVousService {
                 .delegue(delegue)
                 .medecin(medecinService.getById(medecinId))
                 .laboratoire(delegue.getLaboratoire())
-                .statut(StatutRendezVousEnum.CONFIRME)
+                .statut(StatutRendezVousEnum.RESERVE)
                 .build();
 
         creneauService.marquerReserve(creneauId);
@@ -177,19 +177,32 @@ public class RendezVousServiceImpl implements RendezVousService {
 
     @Override
     @Transactional
-    public RendezVous marquerAbsent(String rendezVousId) {
+    public RendezVous marquerAbsentMedecin(String rendezVousId) {
+        // Constaté par le délégué : le médecin ne s'est pas présenté.
         RendezVous rdv = getById(rendezVousId);
         verifierEncoreModifiable(rdv);
-        rdv.setStatut(StatutRendezVousEnum.ABSENT);
+        rdv.setStatut(StatutRendezVousEnum.ABSENT_MEDECIN);
+        creneauService.marquerDisponible(rdv.getCreneau().getId());
+        return rendezVousRepository.save(rdv);
+    }
+
+    @Override
+    @Transactional
+    public RendezVous marquerAbsentDelegue(String rendezVousId) {
+        // Constaté par le médecin : le délégué ne s'est pas présenté.
+        RendezVous rdv = getById(rendezVousId);
+        verifierEncoreModifiable(rdv);
+        rdv.setStatut(StatutRendezVousEnum.ABSENT_DELEGUE);
+        creneauService.marquerDisponible(rdv.getCreneau().getId());
         return rendezVousRepository.save(rdv);
     }
 
     /**
-     * Une fois le RDV REALISE, ANNULE ou ABSENT, plus aucune action ne doit pouvoir le faire
-     * changer d'état (protège la Visite/facturation d'une annulation a posteriori).
+     * Une fois le RDV REALISE, ANNULE, ABSENT_MEDECIN ou ABSENT_DELEGUE, plus aucune action ne
+     * doit pouvoir le faire changer d'état (protège la Visite/facturation d'une modification a posteriori).
      */
     private void verifierEncoreModifiable(RendezVous rdv) {
-        if (rdv.getStatut() != StatutRendezVousEnum.CONFIRME) {
+        if (rdv.getStatut() != StatutRendezVousEnum.RESERVE) {
             throw new BusinessException(
                     "Ce rendez-vous ne peut plus être modifié (statut actuel : " + rdv.getStatut() + ").");
         }
