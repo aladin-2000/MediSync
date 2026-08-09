@@ -44,16 +44,16 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/medecins/mon-profil").hasRole("MEDECIN")
                         .requestMatchers(HttpMethod.PUT, "/api/delegues/mon-profil").hasRole("DELEGUE")
 
+                        // Gestion des créneaux — admin ou le médecin lui-même — avant les regles ADMIN plus larges ci-dessous
+                        .requestMatchers(HttpMethod.POST, "/medecins/creneaux/**").hasAnyRole("ADMIN", "MEDECIN")
+                        .requestMatchers(HttpMethod.DELETE, "/medecins/creneaux/**").hasAnyRole("ADMIN", "MEDECIN")
+
                         // Gestion des médecins et des comptes — réservé aux admins
                         .requestMatchers(HttpMethod.POST, "/medecins/creer-medecin-complet").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/medecins").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/medecins/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/medecins/**").hasRole("ADMIN")
                         .requestMatchers("/users/**").hasRole("ADMIN")
-
-                        // Gestion des créneaux — admin ou le médecin lui-même
-                        .requestMatchers(HttpMethod.POST, "/medecins/creneaux/**").hasAnyRole("ADMIN", "MEDECIN")
-                        .requestMatchers(HttpMethod.DELETE, "/medecins/creneaux/**").hasAnyRole("ADMIN", "MEDECIN")
 
                         // Rendez-vous — réservé au délégué, sauf consultation et confirmation/annulation côté médecin
                         .requestMatchers(HttpMethod.PATCH, "/api/rendezvous/*/annuler-medecin").hasRole("MEDECIN")
