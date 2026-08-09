@@ -48,6 +48,21 @@ public interface RendezVousRepository extends JpaRepository<RendezVous, String> 
                                     @Param("creneauId") String creneauId);
 
     /**
+     * Vérifie qu'un délégué n'a pas déjà un RDV actif avec ce médecin le même jour :
+     * un délégué ne peut réserver qu'une seule visite par jour chez un même médecin.
+     */
+    @Query("""
+            SELECT COUNT(r) > 0 FROM RendezVous r
+            WHERE r.delegue.id = :delegueId
+              AND r.medecin.id = :medecinId
+              AND r.creneau.date = (SELECT c.date FROM Creneau c WHERE c.id = :creneauId)
+              AND r.statut <> 'ANNULE'
+            """)
+    boolean existsByDelegueEtMedecinMemeJour(@Param("delegueId") String delegueId,
+                                             @Param("medecinId") String medecinId,
+                                             @Param("creneauId") String creneauId);
+
+    /**
      * RDV toujours RESERVE, que ce soit sans aucune confirmation (les deux ont oublié)
      * ou avec une seule confirmation faite. Utilisé par le job qui auto-valide après 24h.
      */

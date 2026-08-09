@@ -13,8 +13,10 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
- * Crée un compte Médecin de test au démarrage de l'application, s'il n'existe pas encore.
+ * Crée 5 comptes Médecin de test au démarrage de l'application, s'ils n'existent pas encore.
  * Permet de tester l'app immédiatement sans passer par les 2 appels API (création du user + du profil médecin).
  *
  * Ne fait rien si TEST_MEDECIN_PASSWORD n'est pas défini (comportement par défaut,
@@ -29,11 +31,24 @@ public class TestMedecinBootstrap implements ApplicationRunner {
     private final MedecinService medecinService;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    @Value("${test.medecin.email:medecin.test@medisync.tn}")
-    private String medecinEmail;
-
     @Value("${test.medecin.password:}")
     private String medecinPassword;
+
+    private record MedecinSeed(String email, String nom, String prenom, String specialite,
+                                String adresseCabinet, String telephone, Double latitude, Double longitude) {}
+
+    private static final List<MedecinSeed> MEDECINS = List.of(
+            new MedecinSeed("ahmed.bensalah@medisync.tn", "Ben Salah", "Ahmed", "Cardiologie",
+                    "12 Avenue Habib Bourguiba, Tunis", "+216 71 200 101", 36.8065, 10.1815),
+            new MedecinSeed("amina.trabelsi@medisync.tn", "Trabelsi", "Amina", "Dermatologie",
+                    "5 Rue de Marseille, Tunis", "+216 71 200 102", 36.8000, 10.1800),
+            new MedecinSeed("karim.bouzid@medisync.tn", "Bouzid", "Karim", "Pédiatrie",
+                    "18 Avenue Mohamed V, Sfax", "+216 74 200 103", 34.7406, 10.7603),
+            new MedecinSeed("sonia.gharbi@medisync.tn", "Gharbi", "Sonia", "Gynécologie",
+                    "7 Rue Ibn Khaldoun, Sousse", "+216 73 200 104", 35.8256, 10.6084),
+            new MedecinSeed("yassine.chaabane@medisync.tn", "Chaabane", "Yassine", "Médecine générale",
+                    "22 Avenue de la République, Ariana", "+216 71 200 105", 36.8625, 10.1956)
+    );
 
     @Override
     public void run(ApplicationArguments args) {
@@ -41,25 +56,27 @@ public class TestMedecinBootstrap implements ApplicationRunner {
             return;
         }
 
-        User user;
-        if (userService.existsByEmail(medecinEmail)) {
-            user = userService.getByEmail(medecinEmail);
-        } else {
-            user = userService.save(User.builder()
-                    .email(medecinEmail)
-                    .passwordHash(passwordEncoder.encode(medecinPassword))
-                    .role(RoleEnum.MEDECIN)
-                    .mustChangePassword(false)
-                    .build());
-            log.info("[Profils] Utilisateur médecin de test créé : {}", medecinEmail);
-        }
+        for (MedecinSeed seed : MEDECINS) {
+            User user;
+            if (userService.existsByEmail(seed.email())) {
+                user = userService.getByEmail(seed.email());
+            } else {
+                user = userService.save(User.builder()
+                        .email(seed.email())
+                        .passwordHash(passwordEncoder.encode(medecinPassword))
+                        .role(RoleEnum.MEDECIN)
+                        .mustChangePassword(false)
+                        .build());
+                log.info("[Profils] Utilisateur médecin de test créé : {}", seed.email());
+            }
 
-        try {
-            medecinService.getByUserId(user.getId());
-        } catch (ResourceNotFoundException e) {
-            medecinService.create(user.getId(), "Test", "Médecin", "Médecine générale",
-                    "1 rue de Test, Tunis", null, 36.8065, 10.1815, 0f);
-            log.info("[Profils] Profil médecin de test créé pour {}", medecinEmail);
+            try {
+                medecinService.getByUserId(user.getId());
+            } catch (ResourceNotFoundException e) {
+                medecinService.create(user.getId(), seed.nom(), seed.prenom(), seed.specialite(),
+                        seed.adresseCabinet(), seed.telephone(), seed.latitude(), seed.longitude(), 0f);
+                log.info("[Profils] Profil médecin de test créé pour {}", seed.email());
+            }
         }
     }
 }

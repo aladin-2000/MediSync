@@ -45,6 +45,10 @@ public class RendezVousServiceImpl implements RendezVousService {
         if (rendezVousRepository.existsByDelegueConflict(delegueId, creneauId)) {
             throw new BusinessException("Vous avez déjà un rendez-vous à ce même créneau horaire.");
         }
+        // 3. Délégué a-t-il déjà un RDV le même jour avec ce médecin ?
+        if (rendezVousRepository.existsByDelegueEtMedecinMemeJour(delegueId, medecinId, creneauId)) {
+            throw new BusinessException("Vous avez déjà un rendez-vous avec ce médecin aujourd'hui. Un seul rendez-vous par jour et par médecin est autorisé.");
+        }
 
         var delegue = delegueService.getById(delegueId);
 
