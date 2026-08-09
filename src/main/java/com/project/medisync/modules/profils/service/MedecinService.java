@@ -11,14 +11,14 @@ import java.util.List;
 public interface MedecinService {
 
     Medecin create(String userId, String nom, String prenom, String specialite,
-                   String adresseCabinet, Double latitude, Double longitude, Float scoreFiabiliteMin);
+                   String adresseCabinet, String telephone, Double latitude, Double longitude, Float scoreFiabiliteMin);
 
     /**
      * Crée en une seule fois le compte utilisateur (email + mot de passe, rôle MEDECIN)
      * et le profil médecin associé. Utilisé par l'admin pour créer rapidement des médecins.
      */
     Medecin creerMedecinComplet(String email, String password, String nom, String prenom, String specialite,
-                                 String adresseCabinet, Double latitude, Double longitude, Float scoreFiabiliteMin);
+                                 String adresseCabinet, String telephone, Double latitude, Double longitude, Float scoreFiabiliteMin);
 
     Medecin getById(String id);
 
@@ -36,7 +36,7 @@ public interface MedecinService {
     List<Medecin> getBySpecialite(String specialite);
 
     Medecin update(String id, String nom, String prenom, String specialite,
-                   String adresseCabinet, Double latitude, Double longitude, Float scoreFiabiliteMin);
+                   String adresseCabinet, String telephone, Double latitude, Double longitude, Float scoreFiabiliteMin);
 
     void delete(String id);
 }

@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -40,7 +41,7 @@ public class MedecinController {
     public ResponseEntity<ApiResponse<MedecinResponse>> create(@Valid @RequestBody CreateMedecinRequest req) {
         var medecin = medecinService.create(
                 req.getUserId(), req.getNom(), req.getPrenom(), req.getSpecialite(),
-                req.getAdresseCabinet(), req.getLatitude(), req.getLongitude(), req.getScoreFiabiliteMin());
+                req.getAdresseCabinet(), req.getTelephone(), req.getLatitude(), req.getLongitude(), req.getScoreFiabiliteMin());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.ok("Profil médecin créé avec succès.", MedecinResponse.from(medecin)));
     }
@@ -57,7 +58,7 @@ public class MedecinController {
             @Valid @RequestBody CreateMedecinCompletRequest req) {
         var medecin = medecinService.creerMedecinComplet(
                 req.getEmail(), req.getPassword(), req.getNom(), req.getPrenom(), req.getSpecialite(),
-                req.getAdresseCabinet(), req.getLatitude(), req.getLongitude(), req.getScoreFiabiliteMin());
+                req.getAdresseCabinet(), req.getTelephone(), req.getLatitude(), req.getLongitude(), req.getScoreFiabiliteMin());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.ok("Compte et profil médecin créés avec succès.", MedecinResponse.from(medecin)));
     }
@@ -162,8 +163,28 @@ public class MedecinController {
             @Valid @RequestBody UpdateMedecinRequest req) {
         var medecin = medecinService.update(
                 id, req.getNom(), req.getPrenom(), req.getSpecialite(),
-                req.getAdresseCabinet(), req.getLatitude(), req.getLongitude(), req.getScoreFiabiliteMin());
+                req.getAdresseCabinet(), req.getTelephone(), req.getLatitude(), req.getLongitude(), req.getScoreFiabiliteMin());
         return ResponseEntity.ok(ApiResponse.ok("Profil médecin mis à jour.", MedecinResponse.from(medecin)));
+    }
+
+    /**
+     * Permet au médecin connecté de mettre à jour son propre profil
+     * (nom, prénom, spécialité, coordonnées, téléphone, score minimum accepté).
+     * Ne touche jamais à l'email/mot de passe — ça reste sur /auth/changer-mot-de-passe.
+     *
+     * @param auth Authentification du médecin connecté (résout son userId depuis le JWT)
+     * @param req  DTO contenant les nouvelles valeurs pour son profil
+     * @return Les détails du profil médecin mis à jour
+     */
+    @PutMapping("/mon-profil")
+    public ResponseEntity<ApiResponse<MedecinResponse>> updateMonProfil(
+            Authentication auth,
+            @Valid @RequestBody UpdateMedecinRequest req) {
+        var medecinActuel = medecinService.getByUserId(auth.getName());
+        var medecin = medecinService.update(
+                medecinActuel.getId(), req.getNom(), req.getPrenom(), req.getSpecialite(),
+                req.getAdresseCabinet(), req.getTelephone(), req.getLatitude(), req.getLongitude(), req.getScoreFiabiliteMin());
+        return ResponseEntity.ok(ApiResponse.ok("Profil mis à jour.", MedecinResponse.from(medecin)));
     }
 
     /**

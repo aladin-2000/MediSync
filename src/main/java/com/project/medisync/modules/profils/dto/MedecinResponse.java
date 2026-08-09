@@ -16,6 +16,7 @@ public class MedecinResponse {
     private String        prenom;
     private String        specialite;
     private String        adresseCabinet;
+    private String        telephone;
     private Double        latitude;
     private Double        longitude;
     private String        photoUrl;
@@ -30,6 +31,7 @@ public class MedecinResponse {
                 .prenom(medecin.getPrenom())
                 .specialite(medecin.getSpecialite())
                 .adresseCabinet(medecin.getAdresseCabinet())
+                .telephone(medecin.getTelephone())
                 .latitude(medecin.getLatitude())
                 .longitude(medecin.getLongitude())
                 .photoUrl(medecin.getPhotoUrl())

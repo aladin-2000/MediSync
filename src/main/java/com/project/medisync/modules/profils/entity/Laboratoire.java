@@ -38,6 +38,9 @@ public class Laboratoire {
     @Column(name = "adresse", nullable = false, length = 500)
     private String adresse;
 
+    @Column(name = "telephone", length = 30)
+    private String telephone;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "statut_abonnement", nullable = false, length = 20)
     private StatutAbonnementEnum statutAbonnement;

@@ -58,7 +58,7 @@ public class TestMedecinBootstrap implements ApplicationRunner {
             medecinService.getByUserId(user.getId());
         } catch (ResourceNotFoundException e) {
             medecinService.create(user.getId(), "Test", "Médecin", "Médecine générale",
-                    "1 rue de Test, Tunis", 36.8065, 10.1815, 0f);
+                    "1 rue de Test, Tunis", null, 36.8065, 10.1815, 0f);
             log.info("[Profils] Profil médecin de test créé pour {}", medecinEmail);
         }
     }

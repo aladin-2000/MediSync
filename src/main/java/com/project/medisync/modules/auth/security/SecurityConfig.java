@@ -40,6 +40,10 @@ public class SecurityConfig {
                         // Consultation des médecins et créneaux — public (recherche de médecin sans compte)
                         .requestMatchers(HttpMethod.GET, "/medecins/**").permitAll()
 
+                        // Profil du medecin/delegue connecte lui-meme — avant les regles ADMIN plus larges ci-dessous
+                        .requestMatchers(HttpMethod.PUT, "/medecins/mon-profil").hasRole("MEDECIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/delegues/mon-profil").hasRole("DELEGUE")
+
                         // Gestion des médecins et des comptes — réservé aux admins
                         .requestMatchers(HttpMethod.POST, "/medecins/creer-medecin-complet").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/medecins").hasRole("ADMIN")

@@ -23,6 +23,8 @@ public class CreateLaboratoireRequest {
     @NotBlank(message = "L'adresse est obligatoire.")
     private String adresse;
 
+    private String telephone;
+
     @NotNull(message = "Le statut d'abonnement est obligatoire.")
     private StatutAbonnementEnum statutAbonnement;
 

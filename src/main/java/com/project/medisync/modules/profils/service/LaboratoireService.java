@@ -11,14 +11,14 @@ import java.util.List;
  */
 public interface LaboratoireService {
 
-    Laboratoire create(String userId, String nom, String adresse,
+    Laboratoire create(String userId, String nom, String adresse, String telephone,
                        StatutAbonnementEnum statut, LocalDate dateDebut, LocalDate dateFin);
 
     Laboratoire getById(String id);
 
     List<Laboratoire> getAll();
 
-    Laboratoire update(String id, String nom, String adresse,
+    Laboratoire update(String id, String nom, String adresse, String telephone,
                        StatutAbonnementEnum statut, LocalDate dateDebut, LocalDate dateFin);
 
     void updateDernierPaiement(String laboratoireId, String paiementId);

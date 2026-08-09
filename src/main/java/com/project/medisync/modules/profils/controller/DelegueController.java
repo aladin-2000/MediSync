@@ -2,12 +2,14 @@ package com.project.medisync.modules.profils.controller;
 
 import com.project.medisync.modules.profils.dto.CreateDelegueRequest;
 import com.project.medisync.modules.profils.dto.DelegueResponse;
+import com.project.medisync.modules.profils.dto.UpdateDelegueRequest;
 import com.project.medisync.modules.profils.service.DelegueService;
 import com.project.medisync.shared.dto.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -95,6 +97,23 @@ public class DelegueController {
             @Valid @RequestBody CreateDelegueRequest req) {
         var delegue = delegueService.update(id, req.getNom(), req.getPrenom(), req.getTelephone());
         return ResponseEntity.ok(ApiResponse.ok("Profil délégué mis à jour.", DelegueResponse.from(delegue)));
+    }
+
+    /**
+     * Permet au délégué connecté de mettre à jour son propre profil (nom, prénom, téléphone).
+     * Ne touche jamais à l'email/mot de passe, ni au laboratoire de rattachement.
+     *
+     * @param auth Authentification du délégué connecté (résout son userId depuis le JWT)
+     * @param req  DTO contenant les nouvelles valeurs pour son profil
+     * @return Les détails du profil délégué mis à jour
+     */
+    @PutMapping("/mon-profil")
+    public ResponseEntity<ApiResponse<DelegueResponse>> updateMonProfil(
+            Authentication auth,
+            @Valid @RequestBody UpdateDelegueRequest req) {
+        var delegueActuel = delegueService.getByUserId(auth.getName());
+        var delegue = delegueService.update(delegueActuel.getId(), req.getNom(), req.getPrenom(), req.getTelephone());
+        return ResponseEntity.ok(ApiResponse.ok("Profil mis à jour.", DelegueResponse.from(delegue)));
     }
 
     /**

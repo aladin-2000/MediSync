@@ -5,10 +5,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Requête de mise à jour du profil d'un délégué par lui-même (pas de userId/laboratoireId :
+ * un délégué ne peut pas se réattribuer un autre laboratoire via cette route).
+ */
 @Getter
 @Setter
 @NoArgsConstructor
-public class UpdateMedecinRequest {
+public class UpdateDelegueRequest {
 
     @NotBlank(message = "Le nom est obligatoire.")
     private String nom;
@@ -16,12 +20,5 @@ public class UpdateMedecinRequest {
     @NotBlank(message = "Le prénom est obligatoire.")
     private String prenom;
 
-    @NotBlank(message = "La spécialité est obligatoire.")
-    private String specialite;
-
-    private String adresseCabinet;
     private String telephone;
-    private Double latitude;
-    private Double longitude;
-    private Float  scoreFiabiliteMin;
 }

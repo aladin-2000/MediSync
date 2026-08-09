@@ -32,6 +32,7 @@ public class CreateMedecinCompletRequest {
     private String specialite;
 
     private String adresseCabinet;
+    private String telephone;
     private Double latitude;
     private Double longitude;
     private Float  scoreFiabiliteMin;

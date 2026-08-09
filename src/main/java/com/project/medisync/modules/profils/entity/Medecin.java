@@ -42,6 +42,9 @@ public class Medecin {
     @Column(name = "adresse_cabinet", nullable = false ,length = 500)
     private String adresseCabinet;
 
+    @Column(name = "telephone", length = 30)
+    private String telephone;
+
     @Column(name = "latitude")
     private Double latitude;
 

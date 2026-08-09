@@ -16,6 +16,7 @@ public class LaboratoireResponse {
     private String               userId;
     private String               nom;
     private String               adresse;
+    private String               telephone;
     private StatutAbonnementEnum statutAbonnement;
     private LocalDate            dateDebutAbonnement;
     private LocalDate            dateFinAbonnement;
@@ -28,6 +29,7 @@ public class LaboratoireResponse {
                 .userId(labo.getUser().getId())
                 .nom(labo.getNom())
                 .adresse(labo.getAdresse())
+                .telephone(labo.getTelephone())
                 .statutAbonnement(labo.getStatutAbonnement())
                 .dateDebutAbonnement(labo.getDateDebutAbonnement())
                 .dateFinAbonnement(labo.getDateFinAbonnement())

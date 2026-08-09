@@ -32,7 +32,7 @@ public class LaboratoireController {
     @PostMapping
     public ResponseEntity<ApiResponse<LaboratoireResponse>> create(@Valid @RequestBody CreateLaboratoireRequest req) {
         var labo = laboratoireService.create(
-                req.getUserId(), req.getNom(), req.getAdresse(),
+                req.getUserId(), req.getNom(), req.getAdresse(), req.getTelephone(),
                 req.getStatutAbonnement(), req.getDateDebutAbonnement(), req.getDateFinAbonnement());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.ok("Laboratoire créé avec succès.", LaboratoireResponse.from(labo)));
@@ -73,7 +73,7 @@ public class LaboratoireController {
             @PathVariable String id,
             @Valid @RequestBody CreateLaboratoireRequest req) {
         var labo = laboratoireService.update(
-                id, req.getNom(), req.getAdresse(),
+                id, req.getNom(), req.getAdresse(), req.getTelephone(),
                 req.getStatutAbonnement(), req.getDateDebutAbonnement(), req.getDateFinAbonnement());
         return ResponseEntity.ok(ApiResponse.ok("Laboratoire mis à jour.", LaboratoireResponse.from(labo)));
     }

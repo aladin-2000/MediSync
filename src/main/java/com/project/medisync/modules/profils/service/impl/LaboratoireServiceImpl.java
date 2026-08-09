@@ -25,7 +25,7 @@ public class LaboratoireServiceImpl implements LaboratoireService {
 
     @Override
     @Transactional
-    public Laboratoire create(String userId, String nom, String adresse,
+    public Laboratoire create(String userId, String nom, String adresse, String telephone,
                               StatutAbonnementEnum statut, LocalDate dateDebut, LocalDate dateFin) {
 
         if (!userService.existsById(userId)) {
@@ -42,6 +42,7 @@ public class LaboratoireServiceImpl implements LaboratoireService {
                 .user(userService.getById(userId))
                 .nom(nom)
                 .adresse(adresse)
+                .telephone(telephone)
                 .statutAbonnement(statut)
                 .dateDebutAbonnement(dateDebut)
                 .dateFinAbonnement(dateFin)
@@ -65,12 +66,13 @@ public class LaboratoireServiceImpl implements LaboratoireService {
 
     @Override
     @Transactional
-    public Laboratoire update(String id, String nom, String adresse,
+    public Laboratoire update(String id, String nom, String adresse, String telephone,
                               StatutAbonnementEnum statut, LocalDate dateDebut, LocalDate dateFin) {
 
         Laboratoire labo = getById(id);
         if (nom      != null) labo.setNom(nom);
         if (adresse  != null) labo.setAdresse(adresse);
+        if (telephone != null) labo.setTelephone(telephone);
         if (statut   != null) labo.setStatutAbonnement(statut);
         if (dateDebut != null) labo.setDateDebutAbonnement(dateDebut);
         if (dateFin   != null) {

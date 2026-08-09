@@ -29,7 +29,7 @@ public class MedecinServiceImpl implements MedecinService {
     @Override
     @Transactional
     public Medecin create(String userId, String nom, String prenom, String specialite,
-                          String adresseCabinet, Double latitude, Double longitude, Float scoreFiabiliteMin) {
+                          String adresseCabinet, String telephone, Double latitude, Double longitude, Float scoreFiabiliteMin) {
 
         if (!userService.existsById(userId)) {
             throw new ResourceNotFoundException("Utilisateur", userId);
@@ -44,6 +44,7 @@ public class MedecinServiceImpl implements MedecinService {
                 .prenom(prenom)
                 .specialite(specialite)
                 .adresseCabinet(adresseCabinet)
+                .telephone(telephone)
                 .latitude(latitude)
                 .longitude(longitude)
                 .scoreFiabiliteMin(scoreFiabiliteMin != null ? scoreFiabiliteMin : 0f)
@@ -55,7 +56,7 @@ public class MedecinServiceImpl implements MedecinService {
     @Override
     @Transactional
     public Medecin creerMedecinComplet(String email, String password, String nom, String prenom, String specialite,
-                                        String adresseCabinet, Double latitude, Double longitude, Float scoreFiabiliteMin) {
+                                        String adresseCabinet, String telephone, Double latitude, Double longitude, Float scoreFiabiliteMin) {
 
         if (userService.existsByEmail(email)) {
             throw new BusinessException("Un compte existe déjà avec l'adresse email : " + email);
@@ -74,6 +75,7 @@ public class MedecinServiceImpl implements MedecinService {
                 .prenom(prenom)
                 .specialite(specialite)
                 .adresseCabinet(adresseCabinet)
+                .telephone(telephone)
                 .latitude(latitude)
                 .longitude(longitude)
                 .scoreFiabiliteMin(scoreFiabiliteMin != null ? scoreFiabiliteMin : 0f)
@@ -129,13 +131,14 @@ public class MedecinServiceImpl implements MedecinService {
     @Override
     @Transactional
     public Medecin update(String id, String nom, String prenom, String specialite,
-                          String adresseCabinet, Double latitude, Double longitude, Float scoreFiabiliteMin) {
+                          String adresseCabinet, String telephone, Double latitude, Double longitude, Float scoreFiabiliteMin) {
 
         Medecin medecin = getById(id);
         if (nom            != null) medecin.setNom(nom);
         if (prenom         != null) medecin.setPrenom(prenom);
         if (specialite     != null) medecin.setSpecialite(specialite);
         if (adresseCabinet != null) medecin.setAdresseCabinet(adresseCabinet);
+        if (telephone      != null) medecin.setTelephone(telephone);
         if (latitude       != null) medecin.setLatitude(latitude);
         if (longitude      != null) medecin.setLongitude(longitude);
         if (scoreFiabiliteMin != null) medecin.setScoreFiabiliteMin(scoreFiabiliteMin);
