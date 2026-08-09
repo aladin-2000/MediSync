@@ -28,6 +28,11 @@ public class CreneauServiceImpl implements CreneauService {
 
     /** Clé de dédoublonnage en mémoire (date + heure) pour éviter un exists() par créneau généré. */
     private record CreneauKey(LocalDate date, LocalTime heureDebut) {}
+
+    private static boolean estWeekend(LocalDate date) {
+        DayOfWeek jour = date.getDayOfWeek();
+        return jour == DayOfWeek.SATURDAY || jour == DayOfWeek.SUNDAY;
+    }
     @Override
     public List<Creneau> getAllCreneaux(){
         return creneauRepo.findAll();
@@ -36,6 +41,10 @@ public class CreneauServiceImpl implements CreneauService {
     @Override
     @Transactional
     public Creneau createCreneau(String medecinId, LocalDate date, LocalTime heureDebut) {
+
+        if (estWeekend(date)) {
+            throw new BusinessException("Impossible de publier un créneau le samedi ou le dimanche.");
+        }
 
         // Pas de doublon
         if (creneauRepo.existsByMedecinIdAndDateAndHeureDebut(medecinId, date, heureDebut)) {
@@ -76,6 +85,9 @@ public class CreneauServiceImpl implements CreneauService {
         List<Creneau> creneaux = new ArrayList<>();
 
         for (LocalDate date = dateDebut; !date.isAfter(dateFin); date = date.plusDays(1)) {
+            if (estWeekend(date)) {
+                continue;
+            }
             for (LocalTime heure = heureDebut; heure.isBefore(heureFin); heure = heure.plusMinutes(DUREE_CRENEAU_MINUTES)) {
 
                 if (!existants.add(new CreneauKey(date, heure))) {
