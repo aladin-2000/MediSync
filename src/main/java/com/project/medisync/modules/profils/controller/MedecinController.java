@@ -159,6 +159,7 @@ public class MedecinController {
     public ResponseEntity<ApiResponse<List<SpecialiteOption>>> getSpecialites() {
         List<SpecialiteOption> list = java.util.Arrays.stream(SpecialiteEnum.values())
                 .map(s -> new SpecialiteOption(s.name(), s.getLibelle()))
+                .sorted(java.util.Comparator.comparing(SpecialiteOption::libelle, String.CASE_INSENSITIVE_ORDER))
                 .toList();
         return ResponseEntity.ok(ApiResponse.ok(list));
     }
