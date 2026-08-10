@@ -28,6 +28,7 @@ public interface MedecinRepository extends JpaRepository<Medecin, String> {
             WHERE m.id IN :ids
               AND LOWER(m.nom) LIKE LOWER(CONCAT('%', :nom, '%'))
               AND (:specialites IS NULL OR m.specialite IN :specialites)
+            ORDER BY m.nom ASC, m.prenom ASC
             """)
     List<Medecin> searchByIdsNomSpecialites(
             @Param("ids") List<String> ids,
