@@ -3,6 +3,7 @@ package com.project.medisync.modules.profils.bootstrap;
 import com.project.medisync.modules.auth.entity.RoleEnum;
 import com.project.medisync.modules.auth.entity.User;
 import com.project.medisync.modules.auth.service.UserService;
+import com.project.medisync.modules.profils.entity.SpecialiteEnum;
 import com.project.medisync.modules.profils.service.MedecinService;
 import com.project.medisync.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -34,19 +35,19 @@ public class TestMedecinBootstrap implements ApplicationRunner {
     @Value("${test.medecin.password:}")
     private String medecinPassword;
 
-    private record MedecinSeed(String email, String nom, String prenom, String specialite,
+    private record MedecinSeed(String email, String nom, String prenom, SpecialiteEnum specialite,
                                 String adresseCabinet, String telephone, Double latitude, Double longitude) {}
 
     private static final List<MedecinSeed> MEDECINS = List.of(
-            new MedecinSeed("ahmed.bensalah@medisync.tn", "Ben Salah", "Ahmed", "Cardiologie",
+            new MedecinSeed("ahmed.bensalah@medisync.tn", "Ben Salah", "Ahmed", SpecialiteEnum.CARDIOLOGIE,
                     "12 Avenue Habib Bourguiba, Tunis", "+216 71 200 101", 36.8065, 10.1815),
-            new MedecinSeed("amina.trabelsi@medisync.tn", "Trabelsi", "Amina", "Dermatologie",
+            new MedecinSeed("amina.trabelsi@medisync.tn", "Trabelsi", "Amina", SpecialiteEnum.DERMATOLOGIE,
                     "5 Rue de Marseille, Tunis", "+216 71 200 102", 36.8000, 10.1800),
-            new MedecinSeed("karim.bouzid@medisync.tn", "Bouzid", "Karim", "Pédiatrie",
+            new MedecinSeed("karim.bouzid@medisync.tn", "Bouzid", "Karim", SpecialiteEnum.PEDIATRIE,
                     "18 Avenue Mohamed V, Sfax", "+216 74 200 103", 34.7406, 10.7603),
-            new MedecinSeed("sonia.gharbi@medisync.tn", "Gharbi", "Sonia", "Gynécologie",
+            new MedecinSeed("sonia.gharbi@medisync.tn", "Gharbi", "Sonia", SpecialiteEnum.GYNECOLOGIE,
                     "7 Rue Ibn Khaldoun, Sousse", "+216 73 200 104", 35.8256, 10.6084),
-            new MedecinSeed("yassine.chaabane@medisync.tn", "Chaabane", "Yassine", "Médecine générale",
+            new MedecinSeed("yassine.chaabane@medisync.tn", "Chaabane", "Yassine", SpecialiteEnum.MEDECINE_GENERALE,
                     "22 Avenue de la République, Ariana", "+216 71 200 105", 36.8625, 10.1956)
     );
 

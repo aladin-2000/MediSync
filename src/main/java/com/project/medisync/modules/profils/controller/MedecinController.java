@@ -5,6 +5,8 @@ import com.project.medisync.modules.profils.dto.CreateMedecinCompletRequest;
 import com.project.medisync.modules.profils.dto.CreateMedecinRequest;
 import com.project.medisync.modules.profils.dto.MedecinResponse;
 import com.project.medisync.modules.profils.dto.UpdateMedecinRequest;
+import com.project.medisync.modules.profils.dto.SpecialiteOption;
+import com.project.medisync.modules.profils.entity.SpecialiteEnum;
 import com.project.medisync.modules.profils.service.MedecinService;
 import com.project.medisync.shared.dto.ApiResponse;
 import jakarta.validation.Valid;
@@ -115,13 +117,13 @@ public class MedecinController {
     }
 
     /**
-     * Recherche des médecins par nom et/ou spécialité, parmi ceux ayant au moins
-     * un créneau DISPONIBLE à la date et dans la plage horaire données.
+     * Recherche des médecins par nom et/ou spécialités (une ou plusieurs), parmi ceux ayant
+     * au moins un créneau DISPONIBLE à la date et dans la plage horaire données.
      */
     @GetMapping("/recherche")
     public ResponseEntity<ApiResponse<List<MedecinResponse>>> rechercherMedecinsDisponibles(
             @RequestParam(required = false, defaultValue = "") String nom,
-            @RequestParam(required = false, defaultValue = "") String specialite,
+            @RequestParam(required = false) List<SpecialiteEnum> specialites,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime heureDebut,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime heureFin) {
@@ -130,7 +132,7 @@ public class MedecinController {
         LocalTime fin   = heureFin   != null ? heureFin   : LocalTime.MAX;
 
         List<String> medecinIds = creneauService.getMedecinIdsAvecCreneauxLibres(date, debut, fin);
-        List<MedecinResponse> list = medecinService.searchByIdsNomSpecialite(medecinIds, nom, specialite)
+        List<MedecinResponse> list = medecinService.searchByIdsNomSpecialites(medecinIds, nom, specialites)
                 .stream().map(MedecinResponse::from).toList();
 
         return ResponseEntity.ok(ApiResponse.ok(list));
@@ -138,15 +140,26 @@ public class MedecinController {
 
     /**
      * Récupère la liste des médecins exerçant une spécialité médicale donnée.
-     * Effectue une recherche insensible à la casse et partielle.
      *
-     * @param specialite La spécialité médicale recherchée (ex: Cardiologue)
+     * @param specialite La spécialité médicale recherchée
      * @return La liste des médecins correspondants
      */
     @GetMapping("/specialite/{specialite}")
-    public ResponseEntity<ApiResponse<List<MedecinResponse>>> getBySpecialite(@PathVariable String specialite) {
+    public ResponseEntity<ApiResponse<List<MedecinResponse>>> getBySpecialite(@PathVariable SpecialiteEnum specialite) {
         List<MedecinResponse> list = medecinService.getBySpecialite(specialite)
                 .stream().map(MedecinResponse::from).toList();
+        return ResponseEntity.ok(ApiResponse.ok(list));
+    }
+
+    /**
+     * Liste toutes les spécialités médicales disponibles (valeur enum + libellé affichable),
+     * utilisée par le frontend pour construire un sélecteur (ex: liste à cocher côté délégué).
+     */
+    @GetMapping("/specialites")
+    public ResponseEntity<ApiResponse<List<SpecialiteOption>>> getSpecialites() {
+        List<SpecialiteOption> list = java.util.Arrays.stream(SpecialiteEnum.values())
+                .map(s -> new SpecialiteOption(s.name(), s.getLibelle()))
+                .toList();
         return ResponseEntity.ok(ApiResponse.ok(list));
     }
 

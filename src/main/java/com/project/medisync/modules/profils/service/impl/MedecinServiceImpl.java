@@ -4,6 +4,7 @@ import com.project.medisync.modules.auth.entity.RoleEnum;
 import com.project.medisync.modules.auth.entity.User;
 import com.project.medisync.modules.auth.service.UserService;
 import com.project.medisync.modules.profils.entity.Medecin;
+import com.project.medisync.modules.profils.entity.SpecialiteEnum;
 import com.project.medisync.modules.profils.repository.MedecinRepository;
 import com.project.medisync.modules.profils.service.MedecinService;
 import com.project.medisync.shared.exception.BusinessException;
@@ -28,7 +29,7 @@ public class MedecinServiceImpl implements MedecinService {
 
     @Override
     @Transactional
-    public Medecin create(String userId, String nom, String prenom, String specialite,
+    public Medecin create(String userId, String nom, String prenom, SpecialiteEnum specialite,
                           String adresseCabinet, String telephone, Double latitude, Double longitude, Float scoreFiabiliteMin) {
 
         if (!userService.existsById(userId)) {
@@ -55,7 +56,7 @@ public class MedecinServiceImpl implements MedecinService {
 
     @Override
     @Transactional
-    public Medecin creerMedecinComplet(String email, String password, String nom, String prenom, String specialite,
+    public Medecin creerMedecinComplet(String email, String password, String nom, String prenom, SpecialiteEnum specialite,
                                         String adresseCabinet, String telephone, Double latitude, Double longitude, Float scoreFiabiliteMin) {
 
         if (userService.existsByEmail(email)) {
@@ -114,23 +115,23 @@ public class MedecinServiceImpl implements MedecinService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Medecin> searchByIdsNomSpecialite(List<String> ids, String nom, String specialite) {
+    public List<Medecin> searchByIdsNomSpecialites(List<String> ids, String nom, List<SpecialiteEnum> specialites) {
         if (ids.isEmpty()) {
             return List.of();
         }
-        return medecinRepository.findByIdInAndNomContainingIgnoreCaseAndSpecialiteContainingIgnoreCase(
-                ids, nom, specialite);
+        List<SpecialiteEnum> filtre = (specialites == null || specialites.isEmpty()) ? null : specialites;
+        return medecinRepository.searchByIdsNomSpecialites(ids, nom, filtre);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<Medecin> getBySpecialite(String specialite) {
-        return medecinRepository.findBySpecialiteContainingIgnoreCase(specialite);
+    public List<Medecin> getBySpecialite(SpecialiteEnum specialite) {
+        return medecinRepository.findBySpecialite(specialite);
     }
 
     @Override
     @Transactional
-    public Medecin update(String id, String nom, String prenom, String specialite,
+    public Medecin update(String id, String nom, String prenom, SpecialiteEnum specialite,
                           String adresseCabinet, String telephone, Double latitude, Double longitude, Float scoreFiabiliteMin) {
 
         Medecin medecin = getById(id);

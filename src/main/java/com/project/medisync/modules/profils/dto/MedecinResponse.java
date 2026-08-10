@@ -1,6 +1,7 @@
 package com.project.medisync.modules.profils.dto;
 
 import com.project.medisync.modules.profils.entity.Medecin;
+import com.project.medisync.modules.profils.entity.SpecialiteEnum;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -14,7 +15,7 @@ public class MedecinResponse {
     private String        userId;
     private String        nom;
     private String        prenom;
-    private String        specialite;
+    private SpecialiteEnum specialite;
     private String        adresseCabinet;
     private String        telephone;
     private Double        latitude;

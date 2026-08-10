@@ -1,7 +1,9 @@
 package com.project.medisync.modules.profils.dto;
 
+import com.project.medisync.modules.profils.entity.SpecialiteEnum;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -28,8 +30,8 @@ public class CreateMedecinCompletRequest {
     @NotBlank(message = "Le prénom est obligatoire.")
     private String prenom;
 
-    @NotBlank(message = "La spécialité est obligatoire.")
-    private String specialite;
+    @NotNull(message = "La spécialité est obligatoire.")
+    private SpecialiteEnum specialite;
 
     private String adresseCabinet;
     private String telephone;

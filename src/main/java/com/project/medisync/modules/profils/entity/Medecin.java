@@ -36,8 +36,9 @@ public class Medecin {
     @Column(name = "prenom", nullable = false, length = 100)
     private String prenom;
 
-    @Column(name = "specialite", nullable = false, length = 150)
-    private String specialite;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "specialite", nullable = false, length = 50)
+    private SpecialiteEnum specialite;
 
     @Column(name = "adresse_cabinet", nullable = false ,length = 500)
     private String adresseCabinet;
