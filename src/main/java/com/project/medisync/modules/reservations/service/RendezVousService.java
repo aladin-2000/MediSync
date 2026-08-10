@@ -64,6 +64,12 @@ public interface RendezVousService {
     RendezVous marquerAbsentDelegue(String rendezVousId);
 
     /**
+     * Liste les rendez-vous en statut CONFLIT (une partie a confirmé réalisé pendant que
+     * l'autre marquait absent/annulait), pour investigation manuelle.
+     */
+    List<RendezVous> getConflits();
+
+    /**
      * Auto-valide en REALISE les RDV avec une seule confirmation, 24h après l'heure du RDV
      * (silence de l'autre partie = présomption que la visite a bien eu lieu). Appelé par le job planifié.
      */

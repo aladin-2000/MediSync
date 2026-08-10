@@ -3,6 +3,7 @@ package com.project.medisync.modules.reservations.controller;
 import com.project.medisync.modules.reservations.dto.AnnulationMedecinRequest;
 import com.project.medisync.modules.reservations.dto.ReservationRequest;
 import com.project.medisync.modules.reservations.dto.RendezVousResponse;
+import com.project.medisync.modules.reservations.entity.StatutRendezVousEnum;
 import com.project.medisync.modules.reservations.service.RendezVousService;
 import com.project.medisync.shared.dto.ApiResponse;
 import jakarta.validation.Valid;
@@ -168,9 +169,12 @@ public class RendezVousController {
     @PatchMapping("/{id}/annuler-delegue")
     public ResponseEntity<ApiResponse<RendezVousResponse>> annulerParDelegue(
             @PathVariable String id) {
-        
+
         var rdv = rendezVousService.annulerParDelegue(id);
-        return ResponseEntity.ok(ApiResponse.ok("Rendez-vous annulé avec succès par le délégué.", RendezVousResponse.from(rdv)));
+        String message = rdv.getStatut() == StatutRendezVousEnum.CONFLIT
+                ? "Conflit détecté : le médecin avait confirmé ce rendez-vous comme réalisé. Il a été mis en attente d'investigation."
+                : "Rendez-vous annulé avec succès par le délégué.";
+        return ResponseEntity.ok(ApiResponse.ok(message, RendezVousResponse.from(rdv)));
     }
 
     /**
@@ -184,9 +188,12 @@ public class RendezVousController {
     public ResponseEntity<ApiResponse<RendezVousResponse>> annulerParMedecin(
             @PathVariable String id,
             @Valid @RequestBody AnnulationMedecinRequest request) {
-        
+
         var rdv = rendezVousService.annulerParMedecin(id, request.motifAnnulation());
-        return ResponseEntity.ok(ApiResponse.ok("Rendez-vous annulé avec succès par le médecin. Une proposition de remplacement a été générée.", RendezVousResponse.from(rdv)));
+        String message = rdv.getStatut() == StatutRendezVousEnum.CONFLIT
+                ? "Conflit détecté : le délégué avait confirmé ce rendez-vous comme réalisé. Il a été mis en attente d'investigation."
+                : "Rendez-vous annulé avec succès par le médecin. Une proposition de remplacement a été générée.";
+        return ResponseEntity.ok(ApiResponse.ok(message, RendezVousResponse.from(rdv)));
     }
 
     /**
@@ -236,7 +243,10 @@ public class RendezVousController {
             @PathVariable String id) {
 
         var rdv = rendezVousService.marquerAbsentMedecin(id);
-        return ResponseEntity.ok(ApiResponse.ok("Rendez-vous marqué avec absence du médecin.", RendezVousResponse.from(rdv)));
+        String message = rdv.getStatut() == StatutRendezVousEnum.CONFLIT
+                ? "Conflit détecté : le médecin avait confirmé ce rendez-vous comme réalisé. Il a été mis en attente d'investigation."
+                : "Rendez-vous marqué avec absence du médecin.";
+        return ResponseEntity.ok(ApiResponse.ok(message, RendezVousResponse.from(rdv)));
     }
 
     /**
@@ -250,6 +260,20 @@ public class RendezVousController {
             @PathVariable String id) {
 
         var rdv = rendezVousService.marquerAbsentDelegue(id);
-        return ResponseEntity.ok(ApiResponse.ok("Rendez-vous marqué avec absence du délégué.", RendezVousResponse.from(rdv)));
+        String message = rdv.getStatut() == StatutRendezVousEnum.CONFLIT
+                ? "Conflit détecté : le délégué avait confirmé ce rendez-vous comme réalisé. Il a été mis en attente d'investigation."
+                : "Rendez-vous marqué avec absence du délégué.";
+        return ResponseEntity.ok(ApiResponse.ok(message, RendezVousResponse.from(rdv)));
+    }
+
+    /**
+     * Liste les rendez-vous en statut CONFLIT (une partie a confirmé réalisé pendant que
+     * l'autre marquait absent ou annulait), pour investigation manuelle. Réservé aux admins.
+     */
+    @GetMapping("/conflits")
+    public ResponseEntity<ApiResponse<List<RendezVousResponse>>> getConflits() {
+        List<RendezVousResponse> list = rendezVousService.getConflits()
+                .stream().map(RendezVousResponse::from).toList();
+        return ResponseEntity.ok(ApiResponse.ok("Rendez-vous en conflit récupérés.", list));
     }
 }

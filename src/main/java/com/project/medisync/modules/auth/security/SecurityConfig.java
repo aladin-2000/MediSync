@@ -56,6 +56,7 @@ public class SecurityConfig {
                         .requestMatchers("/users/**").hasRole("ADMIN")
 
                         // Rendez-vous — réservé au délégué, sauf consultation et confirmation/annulation côté médecin
+                        .requestMatchers(HttpMethod.GET, "/api/rendezvous/conflits").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/rendezvous/*/annuler-medecin").hasRole("MEDECIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/rendezvous/*/realise-medecin").hasRole("MEDECIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/rendezvous/*/realise-delegue").hasRole("DELEGUE")

@@ -8,5 +8,11 @@ public enum StatutRendezVousEnum {
     ANNULE,
     REALISE,
     ABSENT_MEDECIN,
-    ABSENT_DELEGUE
+    ABSENT_DELEGUE,
+    /**
+     * Une partie a confirme que le rendez-vous a ete realise (realiseParMedecin ou
+     * realiseParDelegue = true) pendant que l'autre le marque absent ou l'annule.
+     * Etat terminal nécessitant une investigation manuelle (cf. GET /api/rendezvous/conflits).
+     */
+    CONFLIT
 }

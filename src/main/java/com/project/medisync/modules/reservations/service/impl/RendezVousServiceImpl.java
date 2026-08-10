@@ -1,6 +1,9 @@
 package com.project.medisync.modules.reservations.service.impl;
 
+import com.project.medisync.modules.disponibilites.entity.Creneau;
 import com.project.medisync.modules.disponibilites.service.CreneauService;
+import com.project.medisync.modules.notifications.entity.TypeNotificationEnum;
+import com.project.medisync.modules.notifications.service.NotificationService;
 import com.project.medisync.modules.profils.service.DelegueService;
 import com.project.medisync.modules.profils.service.MedecinService;
 import com.project.medisync.modules.reservations.entity.*;
@@ -18,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.lang.String;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Slf4j
@@ -33,6 +37,7 @@ public class RendezVousServiceImpl implements RendezVousService {
     private final CreneauService                   creneauService;
     private final DelegueService                   delegueService;
     private final MedecinService                   medecinService;
+    private final NotificationService              notificationService;
 
     @Override
     @Transactional
@@ -117,10 +122,24 @@ public class RendezVousServiceImpl implements RendezVousService {
         RendezVous rdv = getById(rendezVousId);
         verifierEncoreModifiable(rdv);
         verifierPasEncoreCommence(rdv);
-        rdv.setStatut(StatutRendezVousEnum.ANNULE);
         rdv.setAnnulePar(AnnuleParEnum.DELEGUE);
+
+        if (Boolean.TRUE.equals(rdv.getRealiseParMedecin())) {
+            RendezVous enConflit = passerEnConflit(rdv,
+                    "le médecin avait confirmé réalisé, le délégué annule");
+            notifierMedecin(enConflit, TypeNotificationEnum.CONFLIT,
+                    "Conflit détecté : vous aviez confirmé le rendez-vous du " + creneauLabel(enConflit)
+                            + " avec " + nomDelegue(enConflit) + " comme réalisé, mais le délégué l'a annulé. "
+                            + "Ce rendez-vous est en attente d'investigation.");
+            return enConflit;
+        }
+
+        rdv.setStatut(StatutRendezVousEnum.ANNULE);
         creneauService.marquerDisponible(rdv.getCreneau().getId());
-        return rendezVousRepository.save(rdv);
+        RendezVous annule = rendezVousRepository.save(rdv);
+        notifierMedecin(annule, TypeNotificationEnum.ANNULATION,
+                "Le délégué " + nomDelegue(annule) + " a annulé le rendez-vous du " + creneauLabel(annule) + ".");
+        return annule;
     }
 
     @Override
@@ -131,9 +150,20 @@ public class RendezVousServiceImpl implements RendezVousService {
         }
         RendezVous rdv = getById(rendezVousId);
         verifierEncoreModifiable(rdv);
-        rdv.setStatut(StatutRendezVousEnum.ANNULE);
         rdv.setAnnulePar(AnnuleParEnum.MEDECIN);
         rdv.setMotifAnnulation(motifAnnulation);
+
+        if (Boolean.TRUE.equals(rdv.getRealiseParDelegue())) {
+            RendezVous enConflit = passerEnConflit(rdv,
+                    "le délégué avait confirmé réalisé, le médecin annule");
+            notifierDelegue(enConflit, TypeNotificationEnum.CONFLIT,
+                    "Conflit détecté : vous aviez confirmé le rendez-vous du " + creneauLabel(enConflit)
+                            + " avec " + nomMedecin(enConflit) + " comme réalisé, mais le médecin l'a annulé. "
+                            + "Ce rendez-vous est en attente d'investigation.");
+            return enConflit;
+        }
+
+        rdv.setStatut(StatutRendezVousEnum.ANNULE);
         creneauService.marquerDisponible(rdv.getCreneau().getId());
         rendezVousRepository.save(rdv);
 
@@ -147,6 +177,10 @@ public class RendezVousServiceImpl implements RendezVousService {
         propositionRepository.save(proposition);
         log.info("[Réservations] PropositionRemplacement créée pour le RDV annulé {}.", rendezVousId);
 
+        notifierDelegue(rdv, TypeNotificationEnum.ANNULATION,
+                "Le médecin " + nomMedecin(rdv) + " a annulé le rendez-vous du " + creneauLabel(rdv)
+                        + " (motif : " + motifAnnulation + ").");
+
         return rdv;
     }
 
@@ -156,7 +190,11 @@ public class RendezVousServiceImpl implements RendezVousService {
         RendezVous rdv = getById(rendezVousId);
         verifierEncoreModifiable(rdv);
         rdv.setRealiseParDelegue(true);
-        return confirmerSiLesDeuxPartiesOntValide(rdv);
+        RendezVous resultat = confirmerSiLesDeuxPartiesOntValide(rdv);
+        notifierMedecin(resultat, TypeNotificationEnum.REALISATION,
+                "Le délégué " + nomDelegue(resultat) + " a marqué le rendez-vous du " + creneauLabel(resultat)
+                        + " comme réalisé.");
+        return resultat;
     }
 
     @Override
@@ -165,7 +203,11 @@ public class RendezVousServiceImpl implements RendezVousService {
         RendezVous rdv = getById(rendezVousId);
         verifierEncoreModifiable(rdv);
         rdv.setRealiseParMedecin(true);
-        return confirmerSiLesDeuxPartiesOntValide(rdv);
+        RendezVous resultat = confirmerSiLesDeuxPartiesOntValide(rdv);
+        notifierDelegue(resultat, TypeNotificationEnum.REALISATION,
+                "Le médecin " + nomMedecin(resultat) + " a marqué le rendez-vous du " + creneauLabel(resultat)
+                        + " comme réalisé.");
+        return resultat;
     }
 
     /** Si les deux parties ont confirmé, passe le RDV à REALISE et crée la Visite (preuve de facturation). */
@@ -208,9 +250,24 @@ public class RendezVousServiceImpl implements RendezVousService {
         // Constaté par le délégué : le médecin ne s'est pas présenté.
         RendezVous rdv = getById(rendezVousId);
         verifierEncoreModifiable(rdv);
+
+        if (Boolean.TRUE.equals(rdv.getRealiseParMedecin())) {
+            RendezVous enConflit = passerEnConflit(rdv,
+                    "le médecin avait confirmé réalisé, le délégué le marque absent");
+            notifierMedecin(enConflit, TypeNotificationEnum.CONFLIT,
+                    "Conflit détecté : vous aviez confirmé le rendez-vous du " + creneauLabel(enConflit)
+                            + " avec " + nomDelegue(enConflit) + " comme réalisé, mais le délégué vous a marqué absent. "
+                            + "Ce rendez-vous est en attente d'investigation.");
+            return enConflit;
+        }
+
         rdv.setStatut(StatutRendezVousEnum.ABSENT_MEDECIN);
         creneauService.marquerDisponible(rdv.getCreneau().getId());
-        return rendezVousRepository.save(rdv);
+        RendezVous resultat = rendezVousRepository.save(rdv);
+        notifierMedecin(resultat, TypeNotificationEnum.ABSENCE,
+                "Le délégué " + nomDelegue(resultat) + " vous a marqué absent pour le rendez-vous du "
+                        + creneauLabel(resultat) + ".");
+        return resultat;
     }
 
     @Override
@@ -219,14 +276,47 @@ public class RendezVousServiceImpl implements RendezVousService {
         // Constaté par le médecin : le délégué ne s'est pas présenté.
         RendezVous rdv = getById(rendezVousId);
         verifierEncoreModifiable(rdv);
+
+        if (Boolean.TRUE.equals(rdv.getRealiseParDelegue())) {
+            RendezVous enConflit = passerEnConflit(rdv,
+                    "le délégué avait confirmé réalisé, le médecin le marque absent");
+            notifierDelegue(enConflit, TypeNotificationEnum.CONFLIT,
+                    "Conflit détecté : vous aviez confirmé le rendez-vous du " + creneauLabel(enConflit)
+                            + " avec " + nomMedecin(enConflit) + " comme réalisé, mais le médecin vous a marqué absent. "
+                            + "Ce rendez-vous est en attente d'investigation.");
+            return enConflit;
+        }
+
         rdv.setStatut(StatutRendezVousEnum.ABSENT_DELEGUE);
         creneauService.marquerDisponible(rdv.getCreneau().getId());
+        RendezVous resultat = rendezVousRepository.save(rdv);
+        notifierDelegue(resultat, TypeNotificationEnum.ABSENCE,
+                "Le médecin " + nomMedecin(resultat) + " vous a marqué absent pour le rendez-vous du "
+                        + creneauLabel(resultat) + ".");
+        return resultat;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<RendezVous> getConflits() {
+        return rendezVousRepository.findByStatut(StatutRendezVousEnum.CONFLIT);
+    }
+
+    /**
+     * Bascule le RDV en CONFLIT : une partie avait confirmé "réalisé" pendant que l'autre
+     * marque absent/annule. Le créneau n'est PAS libéré tant que le conflit n'est pas résolu
+     * manuellement (cf. GET /api/rendezvous/conflits).
+     */
+    private RendezVous passerEnConflit(RendezVous rdv, String raison) {
+        rdv.setStatut(StatutRendezVousEnum.CONFLIT);
+        log.warn("[Réservations] CONFLIT sur le RDV {} : {}.", rdv.getId(), raison);
         return rendezVousRepository.save(rdv);
     }
 
     /**
-     * Une fois le RDV REALISE, ANNULE, ABSENT_MEDECIN ou ABSENT_DELEGUE, plus aucune action ne
-     * doit pouvoir le faire changer d'état (protège la Visite/facturation d'une modification a posteriori).
+     * Une fois le RDV REALISE, ANNULE, ABSENT_MEDECIN, ABSENT_DELEGUE ou CONFLIT, plus aucune
+     * action ne doit pouvoir le faire changer d'état (protège la Visite/facturation d'une
+     * modification a posteriori, et fige les conflits pour l'investigation).
      */
     private void verifierEncoreModifiable(RendezVous rdv) {
         if (rdv.getStatut() != StatutRendezVousEnum.RESERVE) {
@@ -241,5 +331,27 @@ public class RendezVousServiceImpl implements RendezVousService {
         if (LocalDateTime.now().isAfter(debutRdv)) {
             throw new BusinessException("Impossible d'annuler : l'heure du rendez-vous est déjà passée.");
         }
+    }
+
+    private void notifierMedecin(RendezVous rdv, TypeNotificationEnum type, String contenu) {
+        notificationService.envoyer(rdv.getMedecin().getUser().getId(), type, contenu);
+    }
+
+    private void notifierDelegue(RendezVous rdv, TypeNotificationEnum type, String contenu) {
+        notificationService.envoyer(rdv.getDelegue().getUser().getId(), type, contenu);
+    }
+
+    private String nomMedecin(RendezVous rdv) {
+        return "Dr " + rdv.getMedecin().getPrenom() + " " + rdv.getMedecin().getNom();
+    }
+
+    private String nomDelegue(RendezVous rdv) {
+        return rdv.getDelegue().getPrenom() + " " + rdv.getDelegue().getNom();
+    }
+
+    private String creneauLabel(RendezVous rdv) {
+        Creneau creneau = rdv.getCreneau();
+        return DateTimeFormatter.ofPattern("dd/MM/yyyy").format(creneau.getDate())
+                + " à " + DateTimeFormatter.ofPattern("HH:mm").format(creneau.getHeureDebut());
     }
 }

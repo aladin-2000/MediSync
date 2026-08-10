@@ -6,6 +6,9 @@ package com.project.medisync.modules.notifications.entity;
 public enum TypeNotificationEnum {
     RESERVATION,
     ANNULATION,
+    REALISATION,
+    ABSENCE,
+    CONFLIT,
     PROPOSITION,
     RAPPEL
 }
