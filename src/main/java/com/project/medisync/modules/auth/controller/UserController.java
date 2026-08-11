@@ -12,7 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,7 +28,7 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * Crée un nouvel utilisateur en base de données.
@@ -46,6 +46,7 @@ public class UserController {
                 .email(req.getEmail())
                 .passwordHash(passwordEncoder.encode(req.getPassword()))
                 .role(req.getRole())
+                .emailVerified(true)
                 .build();
         User saved = userService.save(user);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -64,6 +65,7 @@ public class UserController {
                 .email(req.getEmail())
                 .passwordHash(passwordEncoder.encode(req.getPassword()))
                 .role(RoleEnum.ADMIN)
+                .emailVerified(true)
                 .build();
         User saved = userService.save(admin);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -145,6 +147,7 @@ public class UserController {
                     .passwordHash(passwordEncoder.encode(req.getPassword()))
                     .role(req.getRole())
                     .mustChangePassword(false) // comptes de démo/test, pas de vrai onboarding admin
+                    .emailVerified(true)
                     .build();
 
             userService.save(user);

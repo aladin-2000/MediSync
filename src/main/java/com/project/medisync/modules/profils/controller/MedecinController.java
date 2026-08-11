@@ -3,6 +3,7 @@ package com.project.medisync.modules.profils.controller;
 import com.project.medisync.modules.disponibilites.service.CreneauService;
 import com.project.medisync.modules.profils.dto.CreateMedecinCompletRequest;
 import com.project.medisync.modules.profils.dto.CreateMedecinRequest;
+import com.project.medisync.modules.profils.dto.InscriptionMedecinRequest;
 import com.project.medisync.modules.profils.dto.MedecinResponse;
 import com.project.medisync.modules.profils.dto.UpdateMedecinRequest;
 import com.project.medisync.modules.profils.dto.SpecialiteOption;
@@ -46,6 +47,42 @@ public class MedecinController {
                 req.getAdresseCabinet(), req.getTelephone(), req.getLatitude(), req.getLongitude(), req.getScoreFiabiliteMin());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.ok("Profil médecin créé avec succès.", MedecinResponse.from(medecin)));
+    }
+
+    /**
+     * Auto-inscription publique d'un médecin : crée le compte (email non vérifié) et le
+     * profil (non validé), puis envoie un email de vérification. Le médecin devra ensuite
+     * être validé par un admin avant d'apparaître dans les recherches du délégué.
+     */
+    @PostMapping("/inscription")
+    public ResponseEntity<ApiResponse<MedecinResponse>> inscrire(@Valid @RequestBody InscriptionMedecinRequest req) {
+        var medecin = medecinService.inscrire(
+                req.getEmail(), req.getPassword(), req.getNom(), req.getPrenom(), req.getSpecialite(),
+                req.getAdresseCabinet(), req.getTelephone(), req.getLatitude(), req.getLongitude());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.ok(
+                        "Compte créé. Vérifiez votre boîte email pour activer votre compte, "
+                                + "puis attendez la validation de votre profil par un administrateur.",
+                        MedecinResponse.from(medecin)));
+    }
+
+    /**
+     * Admin : liste les médecins auto-inscrits en attente de validation.
+     */
+    @GetMapping("/en-attente")
+    public ResponseEntity<ApiResponse<List<MedecinResponse>>> getEnAttente() {
+        List<MedecinResponse> list = medecinService.getEnAttente()
+                .stream().map(MedecinResponse::from).toList();
+        return ResponseEntity.ok(ApiResponse.ok(list));
+    }
+
+    /**
+     * Admin : valide le profil d'un médecin auto-inscrit, le rendant visible dans les recherches.
+     */
+    @PatchMapping("/{id}/valider")
+    public ResponseEntity<ApiResponse<MedecinResponse>> valider(@PathVariable String id) {
+        var medecin = medecinService.valider(id);
+        return ResponseEntity.ok(ApiResponse.ok("Médecin validé avec succès.", MedecinResponse.from(medecin)));
     }
 
     /**

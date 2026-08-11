@@ -1,5 +1,8 @@
 package com.project.medisync.modules.profils.service.impl;
 
+import com.project.medisync.modules.auth.entity.RoleEnum;
+import com.project.medisync.modules.auth.entity.User;
+import com.project.medisync.modules.auth.service.EmailVerificationService;
 import com.project.medisync.modules.auth.service.UserService;
 import com.project.medisync.modules.profils.entity.Delegue;
 import com.project.medisync.modules.profils.repository.DelegueRepository;
@@ -9,6 +12,7 @@ import com.project.medisync.shared.exception.BusinessException;
 import com.project.medisync.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +26,8 @@ public class DelegueServiceImpl implements DelegueService {
     private final DelegueRepository  delegueRepository;
     private final UserService        userService;
     private final LaboratoireService laboratoireService;
+    private final EmailVerificationService emailVerificationService;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
@@ -43,6 +49,86 @@ public class DelegueServiceImpl implements DelegueService {
                 .build();
 
         return delegueRepository.save(delegue);
+    }
+
+    @Override
+    @Transactional
+    public Delegue inscrire(String email, String password, String nom, String prenom, String telephone, String laboratoireId) {
+        if (userService.existsByEmail(email)) {
+            throw new BusinessException("Un compte existe déjà avec l'adresse email : " + email);
+        }
+
+        User user = User.builder()
+                .email(email)
+                .passwordHash(passwordEncoder.encode(password))
+                .role(RoleEnum.DELEGUE)
+                .mustChangePassword(false)
+                .emailVerified(false)
+                .build();
+        User savedUser = userService.save(user);
+
+        Delegue delegue = Delegue.builder()
+                .user(savedUser)
+                .laboratoire(laboratoireId != null ? laboratoireService.getById(laboratoireId) : null)
+                .nom(nom)
+                .prenom(prenom)
+                .telephone(telephone)
+                .build();
+
+        Delegue saved = delegueRepository.save(delegue);
+        emailVerificationService.genererEtEnvoyer(savedUser);
+        log.info("[Profils] Auto-inscription délégué {} — en attente de vérification email.", saved.getId());
+        return saved;
+    }
+
+    @Override
+    @Transactional
+    public Delegue creerDelegueComplet(String email, String password, String nom, String prenom, String telephone, String laboratoireId) {
+        if (userService.existsByEmail(email)) {
+            throw new BusinessException("Un compte existe déjà avec l'adresse email : " + email);
+        }
+
+        User user = User.builder()
+                .email(email)
+                .passwordHash(passwordEncoder.encode(password))
+                .role(RoleEnum.DELEGUE)
+                .emailVerified(true)
+                .build();
+        User savedUser = userService.save(user);
+
+        Delegue delegue = Delegue.builder()
+                .user(savedUser)
+                .laboratoire(laboratoireService.getById(laboratoireId))
+                .nom(nom)
+                .prenom(prenom)
+                .telephone(telephone)
+                .build();
+
+        Delegue saved = delegueRepository.save(delegue);
+        log.info("[Profils] Délégué {} créé par le laboratoire {}.", saved.getId(), laboratoireId);
+        return saved;
+    }
+
+    @Override
+    @Transactional
+    public Delegue desactiver(String id) {
+        Delegue delegue = getById(id);
+        User user = delegue.getUser();
+        user.setIsActive(false);
+        userService.save(user);
+        log.info("[Profils] Délégué {} désactivé.", id);
+        return delegue;
+    }
+
+    @Override
+    @Transactional
+    public Delegue activer(String id) {
+        Delegue delegue = getById(id);
+        User user = delegue.getUser();
+        user.setIsActive(true);
+        userService.save(user);
+        log.info("[Profils] Délégué {} réactivé.", id);
+        return delegue;
     }
 
     @Override

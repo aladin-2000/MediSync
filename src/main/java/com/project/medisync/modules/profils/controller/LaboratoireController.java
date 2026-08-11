@@ -62,6 +62,14 @@ public class LaboratoireController {
     }
 
     /**
+     * Récupère le profil laboratoire (et donc son laboratoireId) à partir du userId du compte connecté.
+     */
+    @GetMapping("/by-user/{userId}")
+    public ResponseEntity<ApiResponse<LaboratoireResponse>> getByUserId(@PathVariable String userId) {
+        return ResponseEntity.ok(ApiResponse.ok(LaboratoireResponse.from(laboratoireService.getByUserId(userId))));
+    }
+
+    /**
      * Met à jour les informations d'un profil de Laboratoire existant.
      *
      * @param id L'identifiant unique String du laboratoire à modifier

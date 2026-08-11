@@ -45,6 +45,11 @@ public class User {
     @Builder.Default
     private Boolean mustChangePassword = true;
 
+    /** Faux tant que l'utilisateur n'a pas cliqué sur le lien de vérification reçu par email. */
+    @Column(name = "email_verified", nullable = false)
+    @Builder.Default
+    private Boolean emailVerified = false;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

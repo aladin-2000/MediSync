@@ -1,10 +1,16 @@
 package com.project.medisync.modules.profils.controller;
 
 import com.project.medisync.modules.profils.dto.CreateDelegueRequest;
+import com.project.medisync.modules.profils.dto.CreerDelegueLaboRequest;
 import com.project.medisync.modules.profils.dto.DelegueResponse;
+import com.project.medisync.modules.profils.dto.InscriptionDelegueRequest;
 import com.project.medisync.modules.profils.dto.UpdateDelegueRequest;
+import com.project.medisync.modules.profils.entity.Delegue;
+import com.project.medisync.modules.profils.entity.Laboratoire;
 import com.project.medisync.modules.profils.service.DelegueService;
+import com.project.medisync.modules.profils.service.LaboratoireService;
 import com.project.medisync.shared.dto.ApiResponse;
+import com.project.medisync.shared.exception.BusinessException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,6 +30,71 @@ import java.util.List;
 public class DelegueController {
 
     private final DelegueService delegueService;
+    private final LaboratoireService laboratoireService;
+
+    /**
+     * Auto-inscription publique d'un délégué : crée le compte (email non vérifié) et le
+     * profil rattaché au laboratoire choisi, puis envoie un email de vérification.
+     * Devient actif dès que l'email est vérifié.
+     */
+    @PostMapping("/inscription")
+    public ResponseEntity<ApiResponse<DelegueResponse>> inscrire(@Valid @RequestBody InscriptionDelegueRequest req) {
+        var delegue = delegueService.inscrire(
+                req.getEmail(), req.getPassword(), req.getNom(), req.getPrenom(),
+                req.getTelephone(), req.getLaboratoireId());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.ok(
+                        "Compte créé. Vérifiez votre boîte email pour activer votre compte.",
+                        DelegueResponse.from(delegue)));
+    }
+
+    /**
+     * Laboratoire : crée en un seul appel le compte (email + mot de passe) et le profil délégué,
+     * rattaché au laboratoire du compte connecté.
+     */
+    @PostMapping("/creer-delegue-complet")
+    public ResponseEntity<ApiResponse<DelegueResponse>> creerDelegueComplet(
+            Authentication auth,
+            @Valid @RequestBody CreerDelegueLaboRequest req) {
+        Laboratoire laboratoire = laboratoireService.getByUserId(auth.getName());
+        var delegue = delegueService.creerDelegueComplet(
+                req.getEmail(), req.getPassword(), req.getNom(), req.getPrenom(),
+                req.getTelephone(), laboratoire.getId());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.ok("Compte et profil délégué créés avec succès.", DelegueResponse.from(delegue)));
+    }
+
+    /**
+     * Laboratoire : désactive un délégué de son propre laboratoire (ex: démission) —
+     * il ne peut plus se connecter à son espace.
+     */
+    @PatchMapping("/{id}/desactiver")
+    public ResponseEntity<ApiResponse<DelegueResponse>> desactiver(Authentication auth, @PathVariable String id) {
+        verifierAppartientAuLaboratoire(auth, id);
+        var delegue = delegueService.desactiver(id);
+        return ResponseEntity.ok(ApiResponse.ok("Délégué désactivé.", DelegueResponse.from(delegue)));
+    }
+
+    /**
+     * Laboratoire : réactive un délégué de son propre laboratoire.
+     */
+    @PatchMapping("/{id}/activer")
+    public ResponseEntity<ApiResponse<DelegueResponse>> activer(Authentication auth, @PathVariable String id) {
+        verifierAppartientAuLaboratoire(auth, id);
+        var delegue = delegueService.activer(id);
+        return ResponseEntity.ok(ApiResponse.ok("Délégué réactivé.", DelegueResponse.from(delegue)));
+    }
+
+    /** Empêche un laboratoire d'agir sur un délégué qui ne lui appartient pas. */
+    private void verifierAppartientAuLaboratoire(Authentication auth, String delegueId) {
+        Laboratoire laboratoire = laboratoireService.getByUserId(auth.getName());
+        Delegue delegue = delegueService.getById(delegueId);
+        boolean appartient = delegue.getLaboratoire() != null
+                && delegue.getLaboratoire().getId().equals(laboratoire.getId());
+        if (!appartient) {
+            throw new BusinessException("Ce délégué n'appartient pas à votre laboratoire.");
+        }
+    }
 
     /**
      * Crée un nouveau profil Délégué associé à un compte utilisateur et à un laboratoire existants.

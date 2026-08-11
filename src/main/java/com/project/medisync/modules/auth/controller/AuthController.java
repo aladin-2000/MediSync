@@ -3,9 +3,11 @@ package com.project.medisync.modules.auth.controller;
 import com.project.medisync.modules.auth.dto.AuthResponse;
 import com.project.medisync.modules.auth.dto.ChangePasswordRequest;
 import com.project.medisync.modules.auth.dto.LoginRequest;
+import com.project.medisync.modules.auth.dto.RenvoyerVerificationRequest;
 import com.project.medisync.modules.auth.dto.UserResponse;
 import com.project.medisync.modules.auth.entity.User;
 import com.project.medisync.modules.auth.security.JwtUtil;
+import com.project.medisync.modules.auth.service.EmailVerificationService;
 import com.project.medisync.modules.auth.service.UserService;
 import com.project.medisync.shared.dto.ApiResponse;
 import com.project.medisync.shared.exception.BusinessException;
@@ -13,7 +15,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -26,8 +28,9 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final UserService userService;
+    private final EmailVerificationService emailVerificationService;
     private final JwtUtil jwtUtil;
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * Vérifie l'email et le mot de passe, renvoie un token JWT + les infos de l'utilisateur.
@@ -47,6 +50,9 @@ public class AuthController {
         if (!user.getIsActive()) {
             throw new BusinessException("Ce compte est désactivé.");
         }
+        if (!Boolean.TRUE.equals(user.getEmailVerified())) {
+            throw new BusinessException("Veuillez vérifier votre adresse email avant de vous connecter (consultez votre boîte de réception).");
+        }
 
         String token = jwtUtil.genererToken(user.getId(), user.getRole().name());
         AuthResponse response = AuthResponse.builder()
@@ -55,6 +61,24 @@ public class AuthController {
                 .build();
 
         return ResponseEntity.ok(ApiResponse.ok("Connexion réussie.", response));
+    }
+
+    /**
+     * Valide le jeton reçu par email et marque le compte comme email vérifié.
+     */
+    @GetMapping("/verifier-email")
+    public ResponseEntity<ApiResponse<Void>> verifierEmail(@RequestParam String token) {
+        emailVerificationService.verifier(token);
+        return ResponseEntity.ok(ApiResponse.ok("Email vérifié avec succès. Vous pouvez maintenant vous connecter.", null));
+    }
+
+    /**
+     * Renvoie l'email de vérification (nouveau jeton) si le compte n'est pas déjà vérifié.
+     */
+    @PostMapping("/renvoyer-verification")
+    public ResponseEntity<ApiResponse<Void>> renvoyerVerification(@Valid @RequestBody RenvoyerVerificationRequest req) {
+        emailVerificationService.renvoyer(req.getEmail());
+        return ResponseEntity.ok(ApiResponse.ok("Email de vérification renvoyé.", null));
     }
 
     /**

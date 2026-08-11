@@ -17,15 +17,22 @@ public interface MedecinRepository extends JpaRepository<Medecin, String> {
 
     Optional<Medecin> findByUserId(String userId);
 
-    List<Medecin> findBySpecialite(SpecialiteEnum specialite);
+    /** Médecins visibles du délégué (valide=true) ayant la spécialité donnée. */
+    List<Medecin> findBySpecialiteAndValideTrue(SpecialiteEnum specialite);
+
+    /** Médecins auto-inscrits en attente de validation par un admin. */
+    List<Medecin> findByValideFalse();
 
     /**
      * Recherche par nom (partielle) et spécialités (parmi une liste, optionnelle) au sein
      * d'une liste d'ids donnée. Si specialites est null ou vide, ne filtre pas par spécialité.
+     * Ne retourne que les médecins validés (valide=true) — un médecin auto-inscrit en
+     * attente de validation admin n'apparaît pas dans les recherches du délégué.
      */
     @Query("""
             SELECT m FROM Medecin m
             WHERE m.id IN :ids
+              AND m.valide = true
               AND LOWER(m.nom) LIKE LOWER(CONCAT('%', :nom, '%'))
               AND (:specialites IS NULL OR m.specialite IN :specialites)
             ORDER BY m.nom ASC, m.prenom ASC

@@ -18,6 +18,7 @@ public class DelegueResponse {
     private String        telephone;
     private String        photoUrl;
     private Float         scoreFiabilite;
+    private Boolean       isActive;
     private LocalDateTime createdAt;
 
     public static DelegueResponse from(Delegue delegue) {
@@ -30,6 +31,7 @@ public class DelegueResponse {
                 .telephone(delegue.getTelephone())
                 .photoUrl(delegue.getPhotoUrl())
                 .scoreFiabilite(delegue.getScoreFiabilite())
+                .isActive(delegue.getUser().getIsActive())
                 .createdAt(delegue.getCreatedAt())
                 .build();
     }

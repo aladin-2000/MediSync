@@ -22,6 +22,7 @@ public class MedecinResponse {
     private Double        longitude;
     private String        photoUrl;
     private Float         scoreFiabiliteMin;
+    private Boolean       valide;
     private LocalDateTime createdAt;
 
     public static MedecinResponse from(Medecin medecin) {
@@ -37,6 +38,7 @@ public class MedecinResponse {
                 .longitude(medecin.getLongitude())
                 .photoUrl(medecin.getPhotoUrl())
                 .scoreFiabiliteMin(medecin.getScoreFiabiliteMin())
+                .valide(medecin.getValide())
                 .createdAt(medecin.getCreatedAt())
                 .build();
     }

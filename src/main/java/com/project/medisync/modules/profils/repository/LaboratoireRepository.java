@@ -12,4 +12,6 @@ public interface LaboratoireRepository extends JpaRepository<Laboratoire, String
     Optional<Laboratoire> findByUserId(String userId);
 
     boolean existsByUserId(String userId);
+
+    boolean existsByNom(String nom);
 }

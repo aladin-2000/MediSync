@@ -21,6 +21,20 @@ public interface MedecinService {
     Medecin creerMedecinComplet(String email, String password, String nom, String prenom, SpecialiteEnum specialite,
                                  String adresseCabinet, String telephone, Double latitude, Double longitude, Float scoreFiabiliteMin);
 
+    /**
+     * Auto-inscription : crée le compte (email non vérifié) et le profil (non validé),
+     * puis envoie l'email de vérification. Le médecin doit ensuite être validé par un
+     * admin avant d'apparaître dans les recherches du délégué.
+     */
+    Medecin inscrire(String email, String password, String nom, String prenom, SpecialiteEnum specialite,
+                      String adresseCabinet, String telephone, Double latitude, Double longitude);
+
+    /** Médecins auto-inscrits en attente de validation par un admin. */
+    List<Medecin> getEnAttente();
+
+    /** Valide le profil d'un médecin auto-inscrit : il devient visible dans les recherches. */
+    Medecin valider(String id);
+
     Medecin getById(String id);
 
     /** Récupère le profil médecin associé à un compte utilisateur. */

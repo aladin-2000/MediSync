@@ -8,6 +8,8 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -25,6 +27,11 @@ public class SecurityConfig {
     private final CorsConfigurationSource corsConfigurationSource;
 
     @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
@@ -36,6 +43,19 @@ public class SecurityConfig {
 
                         // Authentification — public
                         .requestMatchers("/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/auth/verifier-email").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth/renvoyer-verification").permitAll()
+
+                        // Auto-inscription médecin/délégué — public
+                        .requestMatchers(HttpMethod.POST, "/medecins/inscription").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/delegues/inscription").permitAll()
+
+                        // Liste des laboratoires — public (sélection du labo à l'inscription du délégué)
+                        .requestMatchers(HttpMethod.GET, "/api/laboratoires").permitAll()
+
+                        // Admin : médecins auto-inscrits en attente de validation — avant le GET /medecins/** public ci-dessous
+                        .requestMatchers(HttpMethod.GET, "/medecins/en-attente").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/medecins/*/valider").hasRole("ADMIN")
 
                         // Consultation des médecins et créneaux — public (recherche de médecin sans compte)
                         .requestMatchers(HttpMethod.GET, "/medecins/**").permitAll()
@@ -55,7 +75,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/medecins/**").hasRole("ADMIN")
                         .requestMatchers("/users/**").hasRole("ADMIN")
 
-                        // Rendez-vous — réservé au délégué, sauf consultation et confirmation/annulation côté médecin
+                        // Espace laboratoire : gestion de ses propres délégués
+                        .requestMatchers(HttpMethod.POST, "/api/delegues/creer-delegue-complet").hasRole("LABO")
+                        .requestMatchers(HttpMethod.PATCH, "/api/delegues/*/desactiver").hasRole("LABO")
+                        .requestMatchers(HttpMethod.PATCH, "/api/delegues/*/activer").hasRole("LABO")
+
+                        // Rendez-vous — réservé au délégué, sauf consultation côté médecin/laboratoire et confirmation/annulation côté médecin
                         .requestMatchers(HttpMethod.GET, "/api/rendezvous/conflits").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/rendezvous/*/annuler-medecin").hasRole("MEDECIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/rendezvous/*/realise-medecin").hasRole("MEDECIN")
@@ -63,6 +88,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/api/rendezvous/*/absent-delegue").hasRole("MEDECIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/rendezvous/*/absent-medecin").hasRole("DELEGUE")
                         .requestMatchers(HttpMethod.GET, "/api/rendezvous/medecin/**").hasAnyRole("DELEGUE", "MEDECIN")
+                        .requestMatchers(HttpMethod.GET, "/api/rendezvous/delegue/**").hasAnyRole("DELEGUE", "LABO")
                         .requestMatchers("/api/rendezvous/**").hasRole("DELEGUE")
 
                         // Tout le reste : il faut juste être connecté

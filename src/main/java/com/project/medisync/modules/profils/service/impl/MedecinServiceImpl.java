@@ -2,6 +2,7 @@ package com.project.medisync.modules.profils.service.impl;
 
 import com.project.medisync.modules.auth.entity.RoleEnum;
 import com.project.medisync.modules.auth.entity.User;
+import com.project.medisync.modules.auth.service.EmailVerificationService;
 import com.project.medisync.modules.auth.service.UserService;
 import com.project.medisync.modules.profils.entity.Medecin;
 import com.project.medisync.modules.profils.entity.SpecialiteEnum;
@@ -11,11 +12,10 @@ import com.project.medisync.shared.exception.BusinessException;
 import com.project.medisync.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -25,7 +25,8 @@ public class MedecinServiceImpl implements MedecinService {
 
     private final MedecinRepository medecinRepository;
     private final UserService        userService; // interface publique Auth — jamais UserRepository
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final EmailVerificationService emailVerificationService;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
@@ -67,6 +68,7 @@ public class MedecinServiceImpl implements MedecinService {
                 .email(email)
                 .passwordHash(passwordEncoder.encode(password))
                 .role(RoleEnum.MEDECIN)
+                .emailVerified(true)
                 .build();
         User savedUser = userService.save(user);
 
@@ -84,6 +86,58 @@ public class MedecinServiceImpl implements MedecinService {
 
         Medecin saved = medecinRepository.save(medecin);
         log.info("[Profils] Médecin complet créé — compte {} + profil {}.", savedUser.getId(), saved.getId());
+        return saved;
+    }
+
+    @Override
+    @Transactional
+    public Medecin inscrire(String email, String password, String nom, String prenom, SpecialiteEnum specialite,
+                             String adresseCabinet, String telephone, Double latitude, Double longitude) {
+
+        if (userService.existsByEmail(email)) {
+            throw new BusinessException("Un compte existe déjà avec l'adresse email : " + email);
+        }
+
+        User user = User.builder()
+                .email(email)
+                .passwordHash(passwordEncoder.encode(password))
+                .role(RoleEnum.MEDECIN)
+                .mustChangePassword(false)
+                .emailVerified(false)
+                .build();
+        User savedUser = userService.save(user);
+
+        Medecin medecin = Medecin.builder()
+                .user(savedUser)
+                .nom(nom)
+                .prenom(prenom)
+                .specialite(specialite)
+                .adresseCabinet(adresseCabinet)
+                .telephone(telephone)
+                .latitude(latitude)
+                .longitude(longitude)
+                .valide(false)
+                .build();
+
+        Medecin saved = medecinRepository.save(medecin);
+        emailVerificationService.genererEtEnvoyer(savedUser);
+        log.info("[Profils] Auto-inscription médecin {} — en attente de vérification email + validation admin.", saved.getId());
+        return saved;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Medecin> getEnAttente() {
+        return medecinRepository.findByValideFalse();
+    }
+
+    @Override
+    @Transactional
+    public Medecin valider(String id) {
+        Medecin medecin = getById(id);
+        medecin.setValide(true);
+        Medecin saved = medecinRepository.save(medecin);
+        log.info("[Profils] Médecin {} validé par un admin.", id);
         return saved;
     }
 
@@ -126,7 +180,7 @@ public class MedecinServiceImpl implements MedecinService {
     @Override
     @Transactional(readOnly = true)
     public List<Medecin> getBySpecialite(SpecialiteEnum specialite) {
-        return medecinRepository.findBySpecialite(specialite);
+        return medecinRepository.findBySpecialiteAndValideTrue(specialite);
     }
 
     @Override

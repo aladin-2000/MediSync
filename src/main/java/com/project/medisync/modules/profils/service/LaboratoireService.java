@@ -16,6 +16,9 @@ public interface LaboratoireService {
 
     Laboratoire getById(String id);
 
+    /** Récupère le laboratoire associé à un compte utilisateur (rôle LABO). */
+    Laboratoire getByUserId(String userId);
+
     List<Laboratoire> getAll();
 
     Laboratoire update(String id, String nom, String adresse, String telephone,

@@ -68,4 +68,13 @@ public class Medecin {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    /**
+     * Faux uniquement pour un médecin auto-inscrit en attente de validation par un admin.
+     * Les médecins créés par un admin (creerMedecinComplet) sont valides par défaut.
+     * Un médecin non valide n'apparaît pas dans les résultats de recherche du délégué.
+     */
+    @Column(name = "valide", nullable = false)
+    @Builder.Default
+    private Boolean valide = true;
+
 }

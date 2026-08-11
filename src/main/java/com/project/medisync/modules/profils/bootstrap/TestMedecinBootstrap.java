@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -30,7 +30,7 @@ public class TestMedecinBootstrap implements ApplicationRunner {
 
     private final UserService    userService;
     private final MedecinService medecinService;
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final PasswordEncoder passwordEncoder;
 
     @Value("${test.medecin.password:}")
     private String medecinPassword;
@@ -67,6 +67,7 @@ public class TestMedecinBootstrap implements ApplicationRunner {
                         .passwordHash(passwordEncoder.encode(medecinPassword))
                         .role(RoleEnum.MEDECIN)
                         .mustChangePassword(false)
+                        .emailVerified(true)
                         .build());
                 log.info("[Profils] Utilisateur médecin de test créé : {}", seed.email());
             }

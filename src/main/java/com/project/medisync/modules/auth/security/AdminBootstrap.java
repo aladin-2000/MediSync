@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 /**
@@ -24,7 +24,7 @@ import org.springframework.stereotype.Component;
 public class AdminBootstrap implements ApplicationRunner {
 
     private final UserService userService;
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final PasswordEncoder passwordEncoder;
 
     @Value("${admin.bootstrap.email:admin@medisync.tn}")
     private String adminEmail;
@@ -45,6 +45,7 @@ public class AdminBootstrap implements ApplicationRunner {
                 .email(adminEmail)
                 .passwordHash(passwordEncoder.encode(adminPassword))
                 .role(RoleEnum.ADMIN)
+                .emailVerified(true)
                 .build();
         userService.save(admin);
         log.info("[Auth] Admin de démarrage créé : {}", adminEmail);

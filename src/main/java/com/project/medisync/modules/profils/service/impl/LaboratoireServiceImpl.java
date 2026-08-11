@@ -60,6 +60,13 @@ public class LaboratoireServiceImpl implements LaboratoireService {
 
     @Override
     @Transactional(readOnly = true)
+    public Laboratoire getByUserId(String userId) {
+        return laboratoireRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Laboratoire pour l'utilisateur", userId));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<Laboratoire> getAll() {
         return laboratoireRepository.findAll();
     }
