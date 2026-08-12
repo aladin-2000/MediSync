@@ -1,6 +1,8 @@
 package com.project.medisync.modules.profils.controller;
 
+import com.project.medisync.modules.profils.dto.CreateLaboratoireCompletRequest;
 import com.project.medisync.modules.profils.dto.CreateLaboratoireRequest;
+import com.project.medisync.modules.profils.dto.InscriptionLaboratoireRequest;
 import com.project.medisync.modules.profils.dto.LaboratoireResponse;
 import com.project.medisync.modules.profils.service.LaboratoireService;
 import com.project.medisync.shared.dto.ApiResponse;
@@ -36,6 +38,51 @@ public class LaboratoireController {
                 req.getStatutAbonnement(), req.getDateDebutAbonnement(), req.getDateFinAbonnement());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.ok("Laboratoire créé avec succès.", LaboratoireResponse.from(labo)));
+    }
+
+    /**
+     * Auto-inscription publique d'un laboratoire (web uniquement) : crée le compte (email non
+     * vérifié) et le profil avec un abonnement d'essai, puis envoie un email de vérification.
+     */
+    @PostMapping("/inscription")
+    public ResponseEntity<ApiResponse<LaboratoireResponse>> inscrire(@Valid @RequestBody InscriptionLaboratoireRequest req) {
+        var labo = laboratoireService.inscrire(req.getEmail(), req.getPassword(), req.getNom(), req.getAdresse(), req.getTelephone());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.ok(
+                        "Compte créé. Vérifiez votre boîte email pour activer votre compte.",
+                        LaboratoireResponse.from(labo)));
+    }
+
+    /**
+     * Admin : crée en un seul appel le compte (email + mot de passe) et le profil laboratoire.
+     */
+    @PostMapping("/creer-labo-complet")
+    public ResponseEntity<ApiResponse<LaboratoireResponse>> creerLaboratoireComplet(
+            @Valid @RequestBody CreateLaboratoireCompletRequest req) {
+        var labo = laboratoireService.creerLaboratoireComplet(
+                req.getEmail(), req.getPassword(), req.getNom(), req.getAdresse(), req.getTelephone(),
+                req.getStatutAbonnement(), req.getDateDebutAbonnement(), req.getDateFinAbonnement());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.ok("Compte et profil laboratoire créés avec succès.", LaboratoireResponse.from(labo)));
+    }
+
+    /**
+     * Admin : réactive un laboratoire.
+     */
+    @PatchMapping("/{id}/activer")
+    public ResponseEntity<ApiResponse<LaboratoireResponse>> activer(@PathVariable String id) {
+        var labo = laboratoireService.activer(id);
+        return ResponseEntity.ok(ApiResponse.ok("Laboratoire réactivé.", LaboratoireResponse.from(labo)));
+    }
+
+    /**
+     * Admin : désactive un laboratoire — il ne peut plus se connecter, et tous ses délégués
+     * sont désactivés avec lui.
+     */
+    @PatchMapping("/{id}/desactiver")
+    public ResponseEntity<ApiResponse<LaboratoireResponse>> desactiver(@PathVariable String id) {
+        var labo = laboratoireService.desactiver(id);
+        return ResponseEntity.ok(ApiResponse.ok("Laboratoire désactivé, ainsi que ses délégués.", LaboratoireResponse.from(labo)));
     }
 
     /**

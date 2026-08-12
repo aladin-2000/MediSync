@@ -21,6 +21,7 @@ public class LaboratoireResponse {
     private LocalDate            dateDebutAbonnement;
     private LocalDate            dateFinAbonnement;
     private String                 dernierPaiementId;
+    private Boolean               isActive;
     private LocalDateTime        createdAt;
 
     public static LaboratoireResponse from(Laboratoire labo) {
@@ -34,6 +35,7 @@ public class LaboratoireResponse {
                 .dateDebutAbonnement(labo.getDateDebutAbonnement())
                 .dateFinAbonnement(labo.getDateFinAbonnement())
                 .dernierPaiementId(labo.getDernierPaiementId())
+                .isActive(labo.getUser().getIsActive())
                 .createdAt(labo.getCreatedAt())
                 .build();
     }

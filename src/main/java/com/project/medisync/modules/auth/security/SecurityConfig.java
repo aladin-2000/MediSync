@@ -46,12 +46,21 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/auth/verifier-email").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/renvoyer-verification").permitAll()
 
-                        // Auto-inscription médecin/délégué — public
+                        // Auto-inscription médecin/délégué/laboratoire — public
                         .requestMatchers(HttpMethod.POST, "/medecins/inscription").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/delegues/inscription").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/laboratoires/inscription").permitAll()
 
                         // Liste des laboratoires — public (sélection du labo à l'inscription du délégué)
                         .requestMatchers(HttpMethod.GET, "/api/laboratoires").permitAll()
+
+                        // Gestion des laboratoires — réservée aux admins (avant les regles LABO plus larges ci-dessous)
+                        .requestMatchers(HttpMethod.POST, "/api/laboratoires/creer-labo-complet").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/laboratoires/*/activer").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/laboratoires/*/desactiver").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/laboratoires").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/laboratoires/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/laboratoires/**").hasRole("ADMIN")
 
                         // Admin : médecins auto-inscrits en attente de validation — avant le GET /medecins/** public ci-dessous
                         .requestMatchers(HttpMethod.GET, "/medecins/en-attente").hasRole("ADMIN")
