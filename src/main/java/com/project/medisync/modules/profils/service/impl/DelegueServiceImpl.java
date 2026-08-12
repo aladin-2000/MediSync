@@ -53,9 +53,13 @@ public class DelegueServiceImpl implements DelegueService {
 
     @Override
     @Transactional
-    public Delegue inscrire(String email, String password, String nom, String prenom, String telephone, String laboratoireId) {
+    public Delegue inscrire(String email, String password, String nom, String prenom, String telephone,
+                             String laboratoireId, String laboName) {
         if (userService.existsByEmail(email)) {
             throw new BusinessException("Un compte existe déjà avec l'adresse email : " + email);
+        }
+        if ((laboratoireId == null || laboratoireId.isBlank()) && (laboName == null || laboName.isBlank())) {
+            throw new BusinessException("Veuillez choisir votre laboratoire ou en saisir le nom.");
         }
 
         User user = User.builder()
@@ -70,6 +74,7 @@ public class DelegueServiceImpl implements DelegueService {
         Delegue delegue = Delegue.builder()
                 .user(savedUser)
                 .laboratoire(laboratoireId != null ? laboratoireService.getById(laboratoireId) : null)
+                .laboName(laboratoireId == null ? laboName : null)
                 .nom(nom)
                 .prenom(prenom)
                 .telephone(telephone)

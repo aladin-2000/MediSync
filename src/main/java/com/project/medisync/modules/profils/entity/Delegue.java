@@ -37,6 +37,15 @@ public class Delegue {
     @JoinColumn(name = "laboratoire_id", nullable = true)
     private Laboratoire laboratoire;
 
+    /**
+     * Nom du laboratoire saisi librement par le délégué à l'inscription, quand celui-ci
+     * n'est pas encore inscrit sur MediSync (donc pas de {@link #laboratoire} rattachable).
+     * Provisoire pour le MVP — à terme, remplacé par un vrai rattachement une fois le
+     * laboratoire inscrit.
+     */
+    @Column(name = "labo_name", length = 150)
+    private String laboName;
+
     @Column(name = "nom", nullable = false, length = 100)
     private String nom;
 

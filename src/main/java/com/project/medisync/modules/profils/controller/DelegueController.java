@@ -41,7 +41,7 @@ public class DelegueController {
     public ResponseEntity<ApiResponse<DelegueResponse>> inscrire(@Valid @RequestBody InscriptionDelegueRequest req) {
         var delegue = delegueService.inscrire(
                 req.getEmail(), req.getPassword(), req.getNom(), req.getPrenom(),
-                req.getTelephone(), req.getLaboratoireId());
+                req.getTelephone(), req.getLaboratoireId(), req.getLaboName());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.ok(
                         "Compte créé. Vérifiez votre boîte email pour activer votre compte.",

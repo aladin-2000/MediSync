@@ -13,6 +13,7 @@ public class DelegueResponse {
     private String          id;
     private String          userId;
     private String          laboratoireId;
+    private String          laboName;
     private String        nom;
     private String        prenom;
     private String        telephone;
@@ -26,6 +27,7 @@ public class DelegueResponse {
                 .id(delegue.getId())
                 .userId(delegue.getUser().getId())
                 .laboratoireId(delegue.getLaboratoire() != null ? delegue.getLaboratoire().getId() : null)
+                .laboName(delegue.getLaboName())
                 .nom(delegue.getNom())
                 .prenom(delegue.getPrenom())
                 .telephone(delegue.getTelephone())
