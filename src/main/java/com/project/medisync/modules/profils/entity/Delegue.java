@@ -26,7 +26,9 @@ public class Delegue {
     @Column(name = "id", updatable = false, nullable = false, length = 36)
     private String id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    // EAGER : DelegueResponse expose isActive (delegue.getUser().getIsActive()), lu hors
+    // transaction dans les controllers — un fetch LAZY y déclenche une LazyInitializationException.
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
