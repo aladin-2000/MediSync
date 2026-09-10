@@ -64,4 +64,6 @@ public interface CreneauRepository extends JpaRepository<Creneau, String> {
             @Param("heureDebut") java.time.LocalTime heureDebut,
             @Param("heureFin")   java.time.LocalTime heureFin
     );
+
+    void deleteByIdAndMedecinId(String id, String medecinId);
 }

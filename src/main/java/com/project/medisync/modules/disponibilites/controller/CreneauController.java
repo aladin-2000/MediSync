@@ -75,6 +75,14 @@ public class CreneauController {
         return ResponseEntity.ok(ApiResponse.ok(
                 nbSupprimes + " créneau(x) supprimé(s) avec succès.", null));
     }
+    @DeleteMapping("/supprimer-un-creneau")
+    public ResponseEntity<ApiResponse<Void>> deleteByIdAndMedecinId(
+            @RequestParam String creneauId,
+            @RequestParam String medecinId){
+        creneauService.deleteByIdAndMedecinId(creneauId,medecinId);
+        return ResponseEntity.ok(ApiResponse.ok(
+                " créneau supprimé avec succès.", null));
+    }
 
     /** GET /medecins/creneaux/periode?medecinId=...&dateDebut=...&dateFin=... — Créneaux d'un médecin sur une période donnée */
     @GetMapping("/periode")

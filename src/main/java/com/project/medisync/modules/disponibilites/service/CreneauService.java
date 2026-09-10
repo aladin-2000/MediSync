@@ -52,6 +52,7 @@ public interface CreneauService {
 
     List<Creneau> getAllCreneaux();
 
+    void deleteByIdAndMedecinId(String id, String medecinId);
 
     /** Appelé par le job @Scheduled chaque vendredi soir. */
   //  void genererCreneauxSemaineProchaine();
