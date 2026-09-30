@@ -26,4 +26,5 @@ public class UpdateMedecinRequest {
     private Double latitude;
     private Double longitude;
     private Float  scoreFiabiliteMin;
+    private String regionId;
 }

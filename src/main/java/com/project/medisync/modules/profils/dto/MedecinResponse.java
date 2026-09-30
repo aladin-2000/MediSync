@@ -23,6 +23,8 @@ public class MedecinResponse {
     private String        photoUrl;
     private Float         scoreFiabiliteMin;
     private Boolean       valide;
+    private String        regionId;
+    private String        regionNom;
     private LocalDateTime createdAt;
 
     public static MedecinResponse from(Medecin medecin) {
@@ -39,6 +41,8 @@ public class MedecinResponse {
                 .photoUrl(medecin.getPhotoUrl())
                 .scoreFiabiliteMin(medecin.getScoreFiabiliteMin())
                 .valide(medecin.getValide())
+                .regionId(medecin.getRegion() != null ? medecin.getRegion().getId() : null)
+                .regionNom(medecin.getRegion() != null ? medecin.getRegion().getNom() : null)
                 .createdAt(medecin.getCreatedAt())
                 .build();
     }

@@ -6,7 +6,9 @@ import com.project.medisync.modules.profils.dto.CreateMedecinRequest;
 import com.project.medisync.modules.profils.dto.InscriptionMedecinRequest;
 import com.project.medisync.modules.profils.dto.MedecinResponse;
 import com.project.medisync.modules.profils.dto.UpdateMedecinRequest;
+import com.project.medisync.modules.profils.dto.RegionOption;
 import com.project.medisync.modules.profils.dto.SpecialiteOption;
+import com.project.medisync.modules.profils.entity.Region;
 import com.project.medisync.modules.profils.entity.SpecialiteEnum;
 import com.project.medisync.modules.profils.service.MedecinService;
 import com.project.medisync.shared.dto.ApiResponse;
@@ -44,7 +46,8 @@ public class MedecinController {
     public ResponseEntity<ApiResponse<MedecinResponse>> create(@Valid @RequestBody CreateMedecinRequest req) {
         var medecin = medecinService.create(
                 req.getUserId(), req.getNom(), req.getPrenom(), req.getSpecialite(),
-                req.getAdresseCabinet(), req.getTelephone(), req.getLatitude(), req.getLongitude(), req.getScoreFiabiliteMin());
+                req.getAdresseCabinet(), req.getTelephone(), req.getLatitude(), req.getLongitude(),
+                req.getScoreFiabiliteMin(), req.getRegionId());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.ok("Profil médecin créé avec succès.", MedecinResponse.from(medecin)));
     }
@@ -58,7 +61,7 @@ public class MedecinController {
     public ResponseEntity<ApiResponse<MedecinResponse>> inscrire(@Valid @RequestBody InscriptionMedecinRequest req) {
         var medecin = medecinService.inscrire(
                 req.getEmail(), req.getPassword(), req.getNom(), req.getPrenom(), req.getSpecialite(),
-                req.getAdresseCabinet(), req.getTelephone(), req.getLatitude(), req.getLongitude());
+                req.getAdresseCabinet(), req.getTelephone(), req.getLatitude(), req.getLongitude(), req.getRegionId());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.ok(
                         "Compte créé. Vérifiez votre boîte email pour activer votre compte, "
@@ -97,7 +100,8 @@ public class MedecinController {
             @Valid @RequestBody CreateMedecinCompletRequest req) {
         var medecin = medecinService.creerMedecinComplet(
                 req.getEmail(), req.getPassword(), req.getNom(), req.getPrenom(), req.getSpecialite(),
-                req.getAdresseCabinet(), req.getTelephone(), req.getLatitude(), req.getLongitude(), req.getScoreFiabiliteMin());
+                req.getAdresseCabinet(), req.getTelephone(), req.getLatitude(), req.getLongitude(),
+                req.getScoreFiabiliteMin(), req.getRegionId());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.ok("Compte et profil médecin créés avec succès.", MedecinResponse.from(medecin)));
     }
@@ -146,7 +150,7 @@ public class MedecinController {
         LocalTime debut = heureDebut != null ? heureDebut : LocalTime.of(0, 0);
         LocalTime fin   = heureFin   != null ? heureFin   : LocalTime.of(23, 0);
 
-        List<String> medecinIds = creneauService.getMedecinIdsAvecCreneauxLibres(date, debut, fin);
+        List<String> medecinIds = creneauService.getMedecinIdsAvecCreneauxLibres(date,date, debut, fin);
         List<MedecinResponse> list = medecinService.getByIds(medecinIds)
                 .stream().map(MedecinResponse::from).toList();
 
@@ -161,15 +165,16 @@ public class MedecinController {
     public ResponseEntity<ApiResponse<List<MedecinResponse>>> rechercherMedecinsDisponibles(
             @RequestParam(required = false, defaultValue = "") String nom,
             @RequestParam(required = false) List<SpecialiteEnum> specialites,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam(required = false) String regionId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate searchDateDebut,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate searchDateFin,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime heureDebut,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime heureFin) {
-
         LocalTime debut = heureDebut != null ? heureDebut : LocalTime.MIN;
         LocalTime fin   = heureFin   != null ? heureFin   : LocalTime.MAX;
 
-        List<String> medecinIds = creneauService.getMedecinIdsAvecCreneauxLibres(date, debut, fin);
-        List<MedecinResponse> list = medecinService.searchByIdsNomSpecialites(medecinIds, nom, specialites)
+        List<String> medecinIds = creneauService.getMedecinIdsAvecCreneauxLibres(searchDateDebut,searchDateFin ,  debut, fin);
+        List<MedecinResponse> list = medecinService.searchByIdsNomSpecialitesRegion(medecinIds, nom, specialites, regionId)
                 .stream().map(MedecinResponse::from).toList();
 
         return ResponseEntity.ok(ApiResponse.ok(list));
@@ -202,6 +207,17 @@ public class MedecinController {
     }
 
     /**
+     * Liste toutes les régions de référence (id + nom), utilisée par le frontend pour
+     * construire un sélecteur (rattachement d'un médecin, filtre de recherche du délégué).
+     */
+    @GetMapping("/regions")
+    public ResponseEntity<ApiResponse<List<RegionOption>>> getRegions() {
+        List<RegionOption> list = medecinService.getRegions()
+                .stream().map(r -> new RegionOption(r.getId(), r.getNom())).toList();
+        return ResponseEntity.ok(ApiResponse.ok(list));
+    }
+
+    /**
      * Met à jour les informations du profil d'un médecin existant.
      *
      * @param id L'identifiant unique String du médecin à modifier
@@ -214,7 +230,8 @@ public class MedecinController {
             @Valid @RequestBody UpdateMedecinRequest req) {
         var medecin = medecinService.update(
                 id, req.getNom(), req.getPrenom(), req.getSpecialite(),
-                req.getAdresseCabinet(), req.getTelephone(), req.getLatitude(), req.getLongitude(), req.getScoreFiabiliteMin());
+                req.getAdresseCabinet(), req.getTelephone(), req.getLatitude(), req.getLongitude(),
+                req.getScoreFiabiliteMin(), req.getRegionId());
         return ResponseEntity.ok(ApiResponse.ok("Profil médecin mis à jour.", MedecinResponse.from(medecin)));
     }
 
@@ -234,7 +251,8 @@ public class MedecinController {
         var medecinActuel = medecinService.getByUserId(auth.getName());
         var medecin = medecinService.update(
                 medecinActuel.getId(), req.getNom(), req.getPrenom(), req.getSpecialite(),
-                req.getAdresseCabinet(), req.getTelephone(), req.getLatitude(), req.getLongitude(), req.getScoreFiabiliteMin());
+                req.getAdresseCabinet(), req.getTelephone(), req.getLatitude(), req.getLongitude(),
+                req.getScoreFiabiliteMin(), req.getRegionId());
         return ResponseEntity.ok(ApiResponse.ok("Profil mis à jour.", MedecinResponse.from(medecin)));
     }
 

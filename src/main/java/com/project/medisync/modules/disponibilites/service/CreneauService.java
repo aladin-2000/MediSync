@@ -41,7 +41,7 @@ public interface CreneauService {
     List<Creneau> getDisponiblesPourRemplacement(String medecinId);
 
     /** Ids des médecins ayant au moins un créneau DISPONIBLE à cette date, entre heureDebut et heureFin. */
-    List<String> getMedecinIdsAvecCreneauxLibres(LocalDate date, LocalTime heureDebut, LocalTime heureFin);
+    List<String> getMedecinIdsAvecCreneauxLibres(LocalDate searchDateDebut, LocalDate searchDatefin, LocalTime heureDebut, LocalTime heureFin);
 
 
     /** Marquer un créneau comme réservé. */

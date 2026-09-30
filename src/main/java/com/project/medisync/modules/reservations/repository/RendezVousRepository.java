@@ -67,4 +67,44 @@ public interface RendezVousRepository extends JpaRepository<RendezVous, String> 
      * ou avec une seule confirmation faite. Utilisé par le job qui auto-valide après 24h.
      */
     List<RendezVous> findByStatut(StatutRendezVousEnum statut);
+
+    @Query("""
+            SELECT r.laboratoire.id, r.laboratoire.nom, COUNT(r)
+            FROM RendezVous r
+            WHERE r.statut = 'REALISE'
+              AND (:dateDebut IS NULL OR r.creneau.date >= :dateDebut)
+              AND (:dateFin IS NULL OR r.creneau.date <= :dateFin)
+            GROUP BY r.laboratoire.id, r.laboratoire.nom
+            ORDER BY COUNT(r) DESC
+            """)
+    List<Object[]> countVisitesParLaboratoire(@Param("dateDebut") java.time.LocalDate dateDebut,
+                                              @Param("dateFin") java.time.LocalDate dateFin);
+
+    @Query("""
+            SELECT r.delegue.id, r.delegue.nom, r.delegue.prenom,
+                   r.delegue.laboratoire.id, r.delegue.laboratoire.nom, COUNT(r)
+            FROM RendezVous r
+            WHERE r.statut = 'REALISE'
+              AND (:dateDebut IS NULL OR r.creneau.date >= :dateDebut)
+              AND (:dateFin IS NULL OR r.creneau.date <= :dateFin)
+            GROUP BY r.delegue.id, r.delegue.nom, r.delegue.prenom,
+                     r.delegue.laboratoire.id, r.delegue.laboratoire.nom
+            ORDER BY COUNT(r) DESC
+            """)
+    List<Object[]> countVisitesParDelegue(@Param("dateDebut") java.time.LocalDate dateDebut,
+                                          @Param("dateFin") java.time.LocalDate dateFin);
+
+    @Query("""
+            SELECT r.delegue.id, r.delegue.nom, r.delegue.prenom, COUNT(r)
+            FROM RendezVous r
+            WHERE r.statut = 'REALISE'
+              AND r.laboratoire.id = :laboratoireId
+              AND (:dateDebut IS NULL OR r.creneau.date >= :dateDebut)
+              AND (:dateFin IS NULL OR r.creneau.date <= :dateFin)
+            GROUP BY r.delegue.id, r.delegue.nom, r.delegue.prenom
+            ORDER BY COUNT(r) DESC
+            """)
+    List<Object[]> countVisitesParDelegueForLaboratoire(@Param("laboratoireId") String laboratoireId,
+                                                        @Param("dateDebut") java.time.LocalDate dateDebut,
+                                                        @Param("dateFin") java.time.LocalDate dateFin);
 }

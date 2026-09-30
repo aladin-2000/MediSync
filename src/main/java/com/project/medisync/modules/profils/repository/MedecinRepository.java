@@ -24,10 +24,11 @@ public interface MedecinRepository extends JpaRepository<Medecin, String> {
     List<Medecin> findByValideFalse();
 
     /**
-     * Recherche par nom OU prénom (partielle, insensible à la casse) et spécialités (parmi une
-     * liste, optionnelle) au sein d'une liste d'ids donnée. Si specialites est null ou vide, ne
-     * filtre pas par spécialité. Ne retourne que les médecins validés (valide=true) — un médecin
-     * auto-inscrit en attente de validation admin n'apparaît pas dans les recherches du délégué.
+     * Recherche par nom OU prénom (partielle, insensible à la casse), spécialités (parmi une
+     * liste, optionnelle) et région (optionnelle) au sein d'une liste d'ids donnée. Si
+     * specialites/regionId est null (ou specialites vide), ne filtre pas sur ce critère. Ne
+     * retourne que les médecins validés (valide=true) — un médecin auto-inscrit en attente de
+     * validation admin n'apparaît pas dans les recherches du délégué.
      */
     @Query("""
             SELECT m FROM Medecin m
@@ -36,12 +37,14 @@ public interface MedecinRepository extends JpaRepository<Medecin, String> {
               AND (LOWER(m.nom) LIKE LOWER(CONCAT('%', :nom, '%'))
                    OR LOWER(m.prenom) LIKE LOWER(CONCAT('%', :nom, '%')))
               AND (:specialites IS NULL OR m.specialite IN :specialites)
+              AND (:regionId IS NULL OR m.region.id = :regionId)
             ORDER BY m.nom ASC, m.prenom ASC
             """)
-    List<Medecin> searchByIdsNomSpecialites(
+    List<Medecin> searchByIdsNomSpecialitesRegion(
             @Param("ids") List<String> ids,
             @Param("nom") String nom,
-            @Param("specialites") List<SpecialiteEnum> specialites);
+            @Param("specialites") List<SpecialiteEnum> specialites,
+            @Param("regionId") String regionId);
 
     boolean existsByUserId(String userId);
 }

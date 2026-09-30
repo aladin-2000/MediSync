@@ -32,13 +32,14 @@ public interface CreneauRepository extends JpaRepository<Creneau, String> {
     /** Ids distincts des médecins ayant au moins un créneau DISPONIBLE sur la plage horaire donnée, à une date donnée. */
     @Query("""
             SELECT DISTINCT c.medecinId FROM Creneau c
-            WHERE c.date        = :date
+            WHERE c.date BETWEEN :searchDateDebut AND :searchDatefin
               AND c.statut      = com.project.medisync.modules.disponibilites.entity.StatutCreneauEnum.DISPONIBLE
               AND c.heureDebut >= :heureDebut
               AND c.heureDebut <  :heureFin
             """)
     List<String> findDistinctMedecinIdsDisponibles(
-            @Param("date")       LocalDate date,
+            @Param("searchDateDebut")       LocalDate searchDateDebut,
+            @Param("searchDatefin")       LocalDate searchDatefin,
             @Param("heureDebut") java.time.LocalTime heureDebut,
             @Param("heureFin")   java.time.LocalTime heureFin
     );

@@ -5,8 +5,10 @@ import com.project.medisync.modules.auth.entity.User;
 import com.project.medisync.modules.auth.service.EmailVerificationService;
 import com.project.medisync.modules.auth.service.UserService;
 import com.project.medisync.modules.profils.entity.Medecin;
+import com.project.medisync.modules.profils.entity.Region;
 import com.project.medisync.modules.profils.entity.SpecialiteEnum;
 import com.project.medisync.modules.profils.repository.MedecinRepository;
+import com.project.medisync.modules.profils.repository.RegionRepository;
 import com.project.medisync.modules.profils.service.MedecinService;
 import com.project.medisync.shared.exception.BusinessException;
 import com.project.medisync.shared.exception.ResourceNotFoundException;
@@ -24,14 +26,25 @@ import java.util.List;
 public class MedecinServiceImpl implements MedecinService {
 
     private final MedecinRepository medecinRepository;
+    private final RegionRepository   regionRepository;
     private final UserService        userService; // interface publique Auth — jamais UserRepository
     private final EmailVerificationService emailVerificationService;
     private final PasswordEncoder passwordEncoder;
 
+    /** Résout un id de région optionnel en entité — null si non fourni. */
+    private Region resoudreRegion(String regionId) {
+        if (regionId == null || regionId.isBlank()) {
+            return null;
+        }
+        return regionRepository.findById(regionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Région", regionId));
+    }
+
     @Override
     @Transactional
     public Medecin create(String userId, String nom, String prenom, SpecialiteEnum specialite,
-                          String adresseCabinet, String telephone, Double latitude, Double longitude, Float scoreFiabiliteMin) {
+                          String adresseCabinet, String telephone, Double latitude, Double longitude,
+                          Float scoreFiabiliteMin, String regionId) {
 
         if (!userService.existsById(userId)) {
             throw new ResourceNotFoundException("Utilisateur", userId);
@@ -50,6 +63,7 @@ public class MedecinServiceImpl implements MedecinService {
                 .latitude(latitude)
                 .longitude(longitude)
                 .scoreFiabiliteMin(scoreFiabiliteMin != null ? scoreFiabiliteMin : 0f)
+                .region(resoudreRegion(regionId))
                 .build();
 
         return medecinRepository.save(medecin);
@@ -58,7 +72,8 @@ public class MedecinServiceImpl implements MedecinService {
     @Override
     @Transactional
     public Medecin creerMedecinComplet(String email, String password, String nom, String prenom, SpecialiteEnum specialite,
-                                        String adresseCabinet, String telephone, Double latitude, Double longitude, Float scoreFiabiliteMin) {
+                                        String adresseCabinet, String telephone, Double latitude, Double longitude,
+                                        Float scoreFiabiliteMin, String regionId) {
 
         if (userService.existsByEmail(email)) {
             throw new BusinessException("Un compte existe déjà avec l'adresse email : " + email);
@@ -82,6 +97,7 @@ public class MedecinServiceImpl implements MedecinService {
                 .latitude(latitude)
                 .longitude(longitude)
                 .scoreFiabiliteMin(scoreFiabiliteMin != null ? scoreFiabiliteMin : 0f)
+                .region(resoudreRegion(regionId))
                 .build();
 
         Medecin saved = medecinRepository.save(medecin);
@@ -92,7 +108,7 @@ public class MedecinServiceImpl implements MedecinService {
     @Override
     @Transactional
     public Medecin inscrire(String email, String password, String nom, String prenom, SpecialiteEnum specialite,
-                             String adresseCabinet, String telephone, Double latitude, Double longitude) {
+                             String adresseCabinet, String telephone, Double latitude, Double longitude, String regionId) {
 
         if (userService.existsByEmail(email)) {
             throw new BusinessException("Un compte existe déjà avec l'adresse email : " + email);
@@ -116,6 +132,7 @@ public class MedecinServiceImpl implements MedecinService {
                 .telephone(telephone)
                 .latitude(latitude)
                 .longitude(longitude)
+                .region(resoudreRegion(regionId))
                 .valide(false)
                 .build();
 
@@ -123,6 +140,12 @@ public class MedecinServiceImpl implements MedecinService {
         emailVerificationService.genererEtEnvoyer(savedUser);
         log.info("[Profils] Auto-inscription médecin {} — en attente de vérification email + validation admin.", saved.getId());
         return saved;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Region> getRegions() {
+        return regionRepository.findAllByOrderByNomAsc();
     }
 
     @Override
@@ -169,12 +192,13 @@ public class MedecinServiceImpl implements MedecinService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Medecin> searchByIdsNomSpecialites(List<String> ids, String nom, List<SpecialiteEnum> specialites) {
+    public List<Medecin> searchByIdsNomSpecialitesRegion(List<String> ids, String nom, List<SpecialiteEnum> specialites, String regionId) {
         if (ids.isEmpty()) {
             return List.of();
         }
         List<SpecialiteEnum> filtre = (specialites == null || specialites.isEmpty()) ? null : specialites;
-        return medecinRepository.searchByIdsNomSpecialites(ids, nom, filtre);
+        String regionFiltre = (regionId == null || regionId.isBlank()) ? null : regionId;
+        return medecinRepository.searchByIdsNomSpecialitesRegion(ids, nom, filtre, regionFiltre);
     }
 
     @Override
@@ -186,7 +210,8 @@ public class MedecinServiceImpl implements MedecinService {
     @Override
     @Transactional
     public Medecin update(String id, String nom, String prenom, SpecialiteEnum specialite,
-                          String adresseCabinet, String telephone, Double latitude, Double longitude, Float scoreFiabiliteMin) {
+                          String adresseCabinet, String telephone, Double latitude, Double longitude,
+                          Float scoreFiabiliteMin, String regionId) {
 
         Medecin medecin = getById(id);
         if (nom            != null) medecin.setNom(nom);
@@ -197,6 +222,7 @@ public class MedecinServiceImpl implements MedecinService {
         if (latitude       != null) medecin.setLatitude(latitude);
         if (longitude      != null) medecin.setLongitude(longitude);
         if (scoreFiabiliteMin != null) medecin.setScoreFiabiliteMin(scoreFiabiliteMin);
+        if (regionId       != null) medecin.setRegion(resoudreRegion(regionId));
         return medecinRepository.save(medecin);
     }
 

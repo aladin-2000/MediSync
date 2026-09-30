@@ -30,4 +30,5 @@ public class CreateMedecinRequest {
     private Double latitude;
     private Double longitude;
     private Float  scoreFiabiliteMin;
+    private String regionId;
 }

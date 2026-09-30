@@ -77,6 +77,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/medecins/creneaux/**").hasAnyRole("ADMIN", "MEDECIN")
                         .requestMatchers(HttpMethod.DELETE, "/medecins/creneaux/**").hasAnyRole("ADMIN", "MEDECIN")
 
+                        // Admin : statistiques de la plateforme
+                        .requestMatchers("/api/admin/stats/**").hasRole("ADMIN")
+
                         // Gestion des médecins et des comptes — réservé aux admins
                         .requestMatchers(HttpMethod.POST, "/medecins/creer-medecin-complet").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/medecins").hasRole("ADMIN")

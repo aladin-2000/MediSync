@@ -43,6 +43,13 @@ public class Medecin {
     @Column(name = "adresse_cabinet", nullable = false ,length = 500)
     private String adresseCabinet;
 
+    // EAGER : MedecinResponse expose regionNom (medecin.getRegion().getNom()), lu hors
+    // transaction dans les controllers — un fetch LAZY y déclenche une LazyInitializationException.
+    // Optionnel : les médecins existants avant l'ajout de ce champ n'en ont pas encore.
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "region_id")
+    private Region region;
+
     @Column(name = "telephone", length = 30)
     private String telephone;
 

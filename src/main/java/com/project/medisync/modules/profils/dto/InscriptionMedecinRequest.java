@@ -39,6 +39,9 @@ public class InscriptionMedecinRequest {
     @NotBlank(message = "L'adresse du cabinet est obligatoire.")
     private String adresseCabinet;
 
+    @NotBlank(message = "La région est obligatoire.")
+    private String regionId;
+
     private String telephone;
     private Double latitude;
     private Double longitude;
