@@ -15,7 +15,7 @@ public class ConfirmationExpireeJob {
 
     private final RendezVousService rendezVousService;
 
-    @Scheduled(fixedRate = 60 * 60 * 1000) // toutes les heures
+    @Scheduled(fixedRate = 60 * 14 * 1000) // toutes les 14 minutes
     public void executer() {
         rendezVousService.resoudreConfirmationsPartiellesExpirees();
     }
