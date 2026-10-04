@@ -67,4 +67,12 @@ public interface CreneauRepository extends JpaRepository<Creneau, String> {
     );
 
     void deleteByIdAndMedecinId(String id, String medecinId);
+
+    @Modifying
+    @Query("""
+            DELETE FROM Creneau c
+            WHERE c.medecinId = :medecinId
+              AND c.statut = com.project.medisync.modules.disponibilites.entity.StatutCreneauEnum.DISPONIBLE
+            """)
+    int deleteDisponiblesByMedecinId(@Param("medecinId") String medecinId);
 }

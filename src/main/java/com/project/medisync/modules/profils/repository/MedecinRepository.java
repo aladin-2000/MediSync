@@ -17,11 +17,13 @@ public interface MedecinRepository extends JpaRepository<Medecin, String> {
 
     Optional<Medecin> findByUserId(String userId);
 
-    /** Médecins visibles du délégué (valide=true) ayant la spécialité donnée. */
-    List<Medecin> findBySpecialiteAndValideTrue(SpecialiteEnum specialite);
+    List<Medecin> findBySupprimeFalse();
 
-    /** Médecins auto-inscrits en attente de validation par un admin. */
-    List<Medecin> findByValideFalse();
+    /** Médecins visibles du délégué (valide=true, non supprimés) ayant la spécialité donnée. */
+    List<Medecin> findBySpecialiteAndValideTrueAndSupprimeFalse(SpecialiteEnum specialite);
+
+    /** Médecins auto-inscrits en attente de validation par un admin (non supprimés). */
+    List<Medecin> findByValideFalseAndSupprimeFalse();
 
     /**
      * Recherche par nom OU prénom (partielle, insensible à la casse), spécialités (parmi une
@@ -34,6 +36,7 @@ public interface MedecinRepository extends JpaRepository<Medecin, String> {
             SELECT m FROM Medecin m
             WHERE m.id IN :ids
               AND m.valide = true
+              AND m.supprime = false
               AND (LOWER(m.nom) LIKE LOWER(CONCAT('%', :nom, '%'))
                    OR LOWER(m.prenom) LIKE LOWER(CONCAT('%', :nom, '%')))
               AND (:specialites IS NULL OR m.specialite IN :specialites)

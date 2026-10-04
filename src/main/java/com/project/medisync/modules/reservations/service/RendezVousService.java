@@ -12,8 +12,7 @@ import java.util.List;
  * <ul>
  *   <li>Un créneau ne peut être réservé qu'une seule fois.</li>
  *   <li>Un délégué ne peut pas avoir deux rendez-vous au même moment.</li>
- *   <li>Si le médecin annule, {@code motifAnnulation} est obligatoire
- *       et une PropositionRemplacement est créée automatiquement.</li>
+ *   <li>Si le médecin annule, {@code motifAnnulation} est obligatoire.</li>
  * </ul>
  * </p>
  */
@@ -42,7 +41,7 @@ public interface RendezVousService {
     /** Annulation par le délégué. */
     RendezVous annulerParDelegue(String rendezVousId);
 
-    /** Annulation par le médecin — motif obligatoire, déclenche une PropositionRemplacement. */
+    /** Annulation par le médecin — motif obligatoire. */
     RendezVous annulerParMedecin(String rendezVousId, String motifAnnulation);
 
     /**

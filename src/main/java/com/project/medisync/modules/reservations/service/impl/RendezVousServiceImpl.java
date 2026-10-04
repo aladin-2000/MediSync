@@ -7,7 +7,6 @@ import com.project.medisync.modules.notifications.service.NotificationService;
 import com.project.medisync.modules.profils.service.DelegueService;
 import com.project.medisync.modules.profils.service.MedecinService;
 import com.project.medisync.modules.reservations.entity.*;
-import com.project.medisync.modules.reservations.repository.PropositionRemplacementRepository;
 import com.project.medisync.modules.reservations.repository.RendezVousRepository;
 import com.project.medisync.modules.reservations.repository.VisiteRepository;
 import com.project.medisync.modules.reservations.service.RendezVousService;
@@ -32,7 +31,6 @@ public class RendezVousServiceImpl implements RendezVousService {
     private static final long DELAI_AUTO_VALIDATION_HEURES = 24;
 
     private final RendezVousRepository             rendezVousRepository;
-    private final PropositionRemplacementRepository propositionRepository;
     private final VisiteRepository                 visiteRepository;
     private final CreneauService                   creneauService;
     private final DelegueService                   delegueService;
@@ -166,16 +164,6 @@ public class RendezVousServiceImpl implements RendezVousService {
         rdv.setStatut(StatutRendezVousEnum.ANNULE);
         creneauService.marquerDisponible(rdv.getCreneau().getId());
         rendezVousRepository.save(rdv);
-
-        // Création automatique d'une PropositionRemplacement
-        PropositionRemplacement proposition = PropositionRemplacement.builder()
-                .rendezVousAnnule(rdv)
-                .delegue(rdv.getDelegue())
-                .medecin(rdv.getMedecin())
-                .statut(StatutPropositionEnum.EN_ATTENTE)
-                .build();
-        propositionRepository.save(proposition);
-        log.info("[Réservations] PropositionRemplacement créée pour le RDV annulé {}.", rendezVousId);
 
         notifierDelegue(rdv, TypeNotificationEnum.ANNULATION,
                 "Le médecin " + nomMedecin(rdv) + " a annulé le rendez-vous du " + creneauLabel(rdv)

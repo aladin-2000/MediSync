@@ -18,8 +18,7 @@ import java.util.UUID;
  * <ul>
  *   <li>Un délégué ne peut pas avoir deux rendez-vous au même moment.</li>
  *   <li>Un créneau ne peut être réservé qu'une seule fois.</li>
- *   <li>Si le médecin annule, {@code motifAnnulation} est obligatoire
- *       et une {@link PropositionRemplacement} est créée automatiquement.</li>
+ *   <li>Si le médecin annule, {@code motifAnnulation} est obligatoire.</li>
  * </ul>
  * </p>
  */

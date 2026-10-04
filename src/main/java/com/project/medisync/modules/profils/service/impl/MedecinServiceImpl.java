@@ -7,9 +7,14 @@ import com.project.medisync.modules.auth.service.UserService;
 import com.project.medisync.modules.profils.entity.Medecin;
 import com.project.medisync.modules.profils.entity.Region;
 import com.project.medisync.modules.profils.entity.SpecialiteEnum;
+import com.project.medisync.modules.disponibilites.repository.CreneauRepository;
 import com.project.medisync.modules.profils.repository.MedecinRepository;
 import com.project.medisync.modules.profils.repository.RegionRepository;
 import com.project.medisync.modules.profils.service.MedecinService;
+import com.project.medisync.modules.reservations.entity.AnnuleParEnum;
+import com.project.medisync.modules.reservations.entity.RendezVous;
+import com.project.medisync.modules.reservations.entity.StatutRendezVousEnum;
+import com.project.medisync.modules.reservations.repository.RendezVousRepository;
 import com.project.medisync.shared.exception.BusinessException;
 import com.project.medisync.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j
@@ -27,9 +33,11 @@ public class MedecinServiceImpl implements MedecinService {
 
     private final MedecinRepository medecinRepository;
     private final RegionRepository   regionRepository;
-    private final UserService        userService; // interface publique Auth — jamais UserRepository
+    private final UserService        userService;
     private final EmailVerificationService emailVerificationService;
     private final PasswordEncoder passwordEncoder;
+    private final RendezVousRepository rendezVousRepository;
+    private final CreneauRepository creneauRepository;
 
     /** Résout un id de région optionnel en entité — null si non fourni. */
     private Region resoudreRegion(String regionId) {
@@ -151,7 +159,7 @@ public class MedecinServiceImpl implements MedecinService {
     @Override
     @Transactional(readOnly = true)
     public List<Medecin> getEnAttente() {
-        return medecinRepository.findByValideFalse();
+        return medecinRepository.findByValideFalseAndSupprimeFalse();
     }
 
     @Override
@@ -181,7 +189,7 @@ public class MedecinServiceImpl implements MedecinService {
     @Override
     @Transactional(readOnly = true)
     public List<Medecin> getAll() {
-        return medecinRepository.findAll();
+        return medecinRepository.findBySupprimeFalse();
     }
 
     @Override
@@ -204,7 +212,7 @@ public class MedecinServiceImpl implements MedecinService {
     @Override
     @Transactional(readOnly = true)
     public List<Medecin> getBySpecialite(SpecialiteEnum specialite) {
-        return medecinRepository.findBySpecialiteAndValideTrue(specialite);
+        return medecinRepository.findBySpecialiteAndValideTrueAndSupprimeFalse(specialite);
     }
 
     @Override
@@ -230,7 +238,22 @@ public class MedecinServiceImpl implements MedecinService {
     @Transactional
     public void delete(String id) {
         Medecin medecin = getById(id);
+
+        List<RendezVous> rdvFuturs = rendezVousRepository.findByMedecinId(id).stream()
+                .filter(r -> !r.getCreneau().getDate().isBefore(LocalDate.now()))
+                .filter(r -> r.getStatut() == StatutRendezVousEnum.RESERVE)
+                .toList();
+        for (RendezVous rdv : rdvFuturs) {
+            rdv.setStatut(StatutRendezVousEnum.ANNULE);
+            rdv.setAnnulePar(AnnuleParEnum.MEDECIN);
+            rdv.setMotifAnnulation("Médecin supprimé par l'administrateur.");
+        }
+        rendezVousRepository.saveAll(rdvFuturs);
+
+        creneauRepository.deleteDisponiblesByMedecinId(id);
+
+        medecin.setSupprime(true);
         medecinRepository.save(medecin);
-        log.info("[Profils] Médecin {} soft-deleted.", id);
+        log.info("[Profils] Médecin {} soft-deleted, {} RDV futurs annulés.", id, rdvFuturs.size());
     }
 }

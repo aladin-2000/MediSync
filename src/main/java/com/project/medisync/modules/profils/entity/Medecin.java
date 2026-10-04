@@ -84,4 +84,8 @@ public class Medecin {
     @Builder.Default
     private Boolean valide = true;
 
+    @Column(name = "supprime", nullable = false)
+    @Builder.Default
+    private Boolean supprime = false;
+
 }

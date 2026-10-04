@@ -192,7 +192,7 @@ public class RendezVousController {
         var rdv = rendezVousService.annulerParMedecin(id, request.motifAnnulation());
         String message = rdv.getStatut() == StatutRendezVousEnum.CONFLIT
                 ? "Conflit détecté : le délégué avait confirmé ce rendez-vous comme réalisé. Il a été mis en attente d'investigation."
-                : "Rendez-vous annulé avec succès par le médecin. Une proposition de remplacement a été générée.";
+                : "Rendez-vous annulé avec succès par le médecin.";
         return ResponseEntity.ok(ApiResponse.ok(message, RendezVousResponse.from(rdv)));
     }
 
