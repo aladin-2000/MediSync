@@ -65,32 +65,36 @@ public class TestMedecinBootstrap implements ApplicationRunner {
             return;
         }
 
-        for (MedecinSeed seed : MEDECINS) {
-            User user;
-            if (userService.existsByEmail(seed.email())) {
-                user = userService.getByEmail(seed.email());
-            } else {
-                user = userService.save(User.builder()
-                        .email(seed.email())
-                        .passwordHash(passwordEncoder.encode(medecinPassword))
-                        .role(RoleEnum.MEDECIN)
-                        .mustChangePassword(false)
-                        .emailVerified(true)
-                        .build());
-                log.info("[Profils] Utilisateur médecin de test créé : {}", seed.email());
-            }
+        try {
+            for (MedecinSeed seed : MEDECINS) {
+                User user;
+                if (userService.existsByEmail(seed.email())) {
+                    user = userService.getByEmail(seed.email());
+                } else {
+                    user = userService.save(User.builder()
+                            .email(seed.email())
+                            .passwordHash(passwordEncoder.encode(medecinPassword))
+                            .role(RoleEnum.MEDECIN)
+                            .mustChangePassword(false)
+                            .emailVerified(true)
+                            .build());
+                    log.info("[Profils] Utilisateur médecin de test créé : {}", seed.email());
+                }
 
-            try {
-                medecinService.getByUserId(user.getId());
-            } catch (ResourceNotFoundException e) {
-                String regionId = regionRepository.findAllByOrderByNomAsc().stream()
-                        .filter(r -> r.getNom().equals(seed.regionNom()))
-                        .map(r -> r.getId())
-                        .findFirst().orElse(null);
-                medecinService.create(user.getId(), seed.nom(), seed.prenom(), seed.specialite(),
-                        seed.adresseCabinet(), seed.telephone(), seed.latitude(), seed.longitude(), 0f, regionId);
-                log.info("[Profils] Profil médecin de test créé pour {}", seed.email());
+                try {
+                    medecinService.getByUserId(user.getId());
+                } catch (ResourceNotFoundException e) {
+                    String regionId = regionRepository.findAllByOrderByNomAsc().stream()
+                            .filter(r -> r.getNom().equals(seed.regionNom()))
+                            .map(r -> r.getId())
+                            .findFirst().orElse(null);
+                    medecinService.create(user.getId(), seed.nom(), seed.prenom(), seed.specialite(),
+                            seed.adresseCabinet(), seed.telephone(), seed.latitude(), seed.longitude(), 0f, regionId);
+                    log.info("[Profils] Profil médecin de test créé pour {}", seed.email());
+                }
             }
+        } catch (Exception e) {
+            log.warn("[Profils] Bootstrap médecins de test ignoré (schéma pas encore à jour) : {}", e.getMessage());
         }
     }
 }
