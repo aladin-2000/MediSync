@@ -26,6 +26,7 @@ public class MedecinResponse {
     private String        regionId;
     private String        regionNom;
     private LocalDateTime createdAt;
+    //private Boolean isActive;
 
     public static MedecinResponse from(Medecin medecin) {
         return MedecinResponse.builder()
@@ -44,6 +45,7 @@ public class MedecinResponse {
                 .regionId(medecin.getRegion() != null ? medecin.getRegion().getId() : null)
                 .regionNom(medecin.getRegion() != null ? medecin.getRegion().getNom() : null)
                 .createdAt(medecin.getCreatedAt())
+               // .isActive(medecin.getUser().getIsActive())
                 .build();
     }
 }

@@ -4,6 +4,7 @@ import com.project.medisync.modules.auth.entity.RoleEnum;
 import com.project.medisync.modules.auth.entity.User;
 import com.project.medisync.modules.auth.service.EmailVerificationService;
 import com.project.medisync.modules.auth.service.UserService;
+import com.project.medisync.modules.profils.dto.MedecinResponse;
 import com.project.medisync.modules.profils.entity.Medecin;
 import com.project.medisync.modules.profils.entity.Region;
 import com.project.medisync.modules.profils.entity.SpecialiteEnum;
@@ -25,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -256,4 +258,16 @@ public class MedecinServiceImpl implements MedecinService {
         medecinRepository.save(medecin);
         log.info("[Profils] Médecin {} soft-deleted, {} RDV futurs annulés.", id, rdvFuturs.size());
     }
+
+  /*MedecinResponse activer(String medecin_id){
+        Optional<Medecin> medecin = medecinRepository.findById(medecin_id);
+        medecin.get().getUser().setIsActive(true);
+        medecin
+  }
+  MedecinResponse desactiver(String medecin_id) {
+    Optional<Medecin> medecin = medecinRepository.findById(medecin_id);
+    medecin.get().getUser().setIsActive(false);
+
+  }*/
+
 }

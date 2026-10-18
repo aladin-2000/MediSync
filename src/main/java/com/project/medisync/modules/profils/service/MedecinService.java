@@ -1,5 +1,6 @@
 package com.project.medisync.modules.profils.service;
 
+import com.project.medisync.modules.profils.dto.MedecinResponse;
 import com.project.medisync.modules.profils.entity.Medecin;
 import com.project.medisync.modules.profils.entity.Region;
 import com.project.medisync.modules.profils.entity.SpecialiteEnum;
@@ -65,4 +66,7 @@ public interface MedecinService {
                    Float scoreFiabiliteMin, String regionId);
 
     void delete(String id);
+
+    /*MedecinResponse activer(String medecin_id);
+    MedecinResponse desactiver(String medecin_id);*/
 }
