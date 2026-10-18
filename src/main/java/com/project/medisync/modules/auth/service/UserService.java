@@ -2,13 +2,9 @@ package com.project.medisync.modules.auth.service;
 
 import com.project.medisync.modules.auth.entity.User;
 import com.project.medisync.modules.auth.entity.RoleEnum;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-
-/**
- * Interface publique du module Auth.
- * Les autres modules passent obligatoirement par cette interface
- * pour accéder aux données utilisateur — jamais par UserRepository directement.
- */
 public interface UserService {
 
     User getById(String id);
@@ -21,6 +17,11 @@ public interface UserService {
 
     boolean existsByEmail(String email);
 
-    /** Soft delete de l'utilisateur. */
     void delete(String id);
+
+    Page<User> getMedecinsEtDelegues(RoleEnum role, String search, Pageable pageable);
+
+    User activer(String id);
+
+    User desactiver(String id);
 }

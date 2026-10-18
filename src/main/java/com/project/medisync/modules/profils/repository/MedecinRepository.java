@@ -50,4 +50,6 @@ public interface MedecinRepository extends JpaRepository<Medecin, String> {
             @Param("regionId") String regionId);
 
     boolean existsByUserId(String userId);
+
+    List<Medecin> findByUserIdIn(List<String> userIds);
 }

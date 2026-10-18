@@ -1,15 +1,16 @@
 package com.project.medisync.modules.auth.service.impl;
 
+import com.project.medisync.modules.auth.entity.RoleEnum;
 import com.project.medisync.modules.auth.entity.User;
 import com.project.medisync.modules.auth.repository.UserRepository;
 import com.project.medisync.modules.auth.service.UserService;
 import com.project.medisync.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
 
 @Slf4j
 @Service
@@ -57,5 +58,27 @@ public class UserServiceImpl implements UserService {
         user.setIsActive(false);
         userRepository.save(user);
         log.info("[Auth] Utilisateur {} soft-deleted.", id);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<User> getMedecinsEtDelegues(RoleEnum role, String search, Pageable pageable) {
+        return userRepository.findMedecinsEtDelegues(role, search, pageable);
+    }
+
+    @Override
+    @Transactional
+    public User activer(String id) {
+        User user = getById(id);
+        user.setIsActive(true);
+        return userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public User desactiver(String id) {
+        User user = getById(id);
+        user.setIsActive(false);
+        return userRepository.save(user);
     }
 }

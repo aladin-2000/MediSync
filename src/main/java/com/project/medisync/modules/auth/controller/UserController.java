@@ -2,20 +2,30 @@ package com.project.medisync.modules.auth.controller;
 
 import com.project.medisync.modules.auth.dto.CreateAdminRequest;
 import com.project.medisync.modules.auth.dto.CreateUserRequest;
+import com.project.medisync.modules.auth.dto.UserDetailResponse;
 import com.project.medisync.modules.auth.dto.UserResponse;
 import com.project.medisync.modules.auth.entity.RoleEnum;
 import com.project.medisync.modules.auth.entity.User;
 import com.project.medisync.modules.auth.service.UserService;
+import com.project.medisync.modules.profils.entity.Delegue;
+import com.project.medisync.modules.profils.entity.Medecin;
+import com.project.medisync.modules.profils.repository.DelegueRepository;
+import com.project.medisync.modules.profils.repository.MedecinRepository;
 import com.project.medisync.shared.dto.ApiResponse;
+import com.project.medisync.shared.dto.PageResponse;
 import com.project.medisync.shared.exception.BusinessException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 /**
@@ -29,6 +39,8 @@ public class UserController {
 
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
+    private final MedecinRepository medecinRepository;
+    private final DelegueRepository delegueRepository;
 
     /**
      * Crée un nouvel utilisateur en base de données.
@@ -167,12 +179,81 @@ public class UserController {
         return req;
     }
 
-    /**
-     * Récupère un utilisateur spécifique par son identifiant unique String.
-     *
-     * @param id L'identifiant unique String de l'utilisateur à récupérer
-     * @return Les détails de l'utilisateur trouvé
-     */
+    @GetMapping("liste")
+    public ResponseEntity<ApiResponse<PageResponse<UserDetailResponse>>> getListe(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) RoleEnum role,
+            @RequestParam(required = false) String search) {
+
+        Page<User> usersPage = userService.getMedecinsEtDelegues(role, search, PageRequest.of(page, size));
+        List<User> users = usersPage.getContent();
+
+        List<String> medecinUserIds = users.stream()
+                .filter(u -> u.getRole() == RoleEnum.MEDECIN)
+                .map(User::getId)
+                .toList();
+        List<String> delegueUserIds = users.stream()
+                .filter(u -> u.getRole() == RoleEnum.DELEGUE)
+                .map(User::getId)
+                .toList();
+
+        Map<String, Medecin> medecinsMap = medecinUserIds.isEmpty()
+                ? Map.of()
+                : medecinRepository.findByUserIdIn(medecinUserIds).stream()
+                        .collect(Collectors.toMap(m -> m.getUser().getId(), m -> m));
+
+        Map<String, Delegue> deleguesMap = delegueUserIds.isEmpty()
+                ? Map.of()
+                : delegueRepository.findByUserIdIn(delegueUserIds).stream()
+                        .collect(Collectors.toMap(d -> d.getUser().getId(), d -> d));
+
+        List<UserDetailResponse> dtos = users.stream().map(user -> {
+            String nom = "";
+            String prenom = "";
+            if (user.getRole() == RoleEnum.MEDECIN) {
+                Medecin m = medecinsMap.get(user.getId());
+                if (m != null) { nom = m.getNom(); prenom = m.getPrenom(); }
+            } else {
+                Delegue d = deleguesMap.get(user.getId());
+                if (d != null) { nom = d.getNom(); prenom = d.getPrenom(); }
+            }
+            return UserDetailResponse.from(user, nom, prenom);
+        }).toList();
+
+        return ResponseEntity.ok(ApiResponse.ok(PageResponse.from(usersPage, dtos)));
+    }
+
+    @PatchMapping("{id}/activer")
+    public ResponseEntity<ApiResponse<UserDetailResponse>> activer(@PathVariable String id) {
+        User user = userService.activer(id);
+        String nom = "";
+        String prenom = "";
+        if (user.getRole() == RoleEnum.MEDECIN) {
+            Medecin m = medecinRepository.findByUserId(id).orElse(null);
+            if (m != null) { nom = m.getNom(); prenom = m.getPrenom(); }
+        } else if (user.getRole() == RoleEnum.DELEGUE) {
+            Delegue d = delegueRepository.findByUserId(id).orElse(null);
+            if (d != null) { nom = d.getNom(); prenom = d.getPrenom(); }
+        }
+        return ResponseEntity.ok(ApiResponse.ok("Utilisateur activé.", UserDetailResponse.from(user, nom, prenom)));
+    }
+
+    @PatchMapping("{id}/desactiver")
+    public ResponseEntity<ApiResponse<UserDetailResponse>> desactiver(@PathVariable String id) {
+        User user = userService.desactiver(id);
+        String nom = "";
+        String prenom = "";
+        if (user.getRole() == RoleEnum.MEDECIN) {
+            Medecin m = medecinRepository.findByUserId(id).orElse(null);
+            if (m != null) { nom = m.getNom(); prenom = m.getPrenom(); }
+        } else if (user.getRole() == RoleEnum.DELEGUE) {
+            Delegue d = delegueRepository.findByUserId(id).orElse(null);
+            if (d != null) { nom = d.getNom(); prenom = d.getPrenom(); }
+        }
+        return ResponseEntity.ok(ApiResponse.ok("Utilisateur désactivé.", UserDetailResponse.from(user, nom, prenom)));
+    }
+
     @GetMapping()
     public ResponseEntity<ApiResponse<UserResponse>> getById(@RequestParam  String id) {
         return ResponseEntity.ok(ApiResponse.ok(UserResponse.from(userService.getById(id))));

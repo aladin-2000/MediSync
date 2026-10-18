@@ -15,4 +15,6 @@ public interface DelegueRepository extends JpaRepository<Delegue, String> {
     Optional<Delegue> findByUserId(String userId);
 
     boolean existsByUserId(String userId);
+
+    List<Delegue> findByUserIdIn(List<String> userIds);
 }
