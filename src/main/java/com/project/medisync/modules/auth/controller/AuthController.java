@@ -48,7 +48,7 @@ public class AuthController {
             throw new BusinessException("Email ou mot de passe incorrect.");
         }
         if (!user.getIsActive()) {
-            throw new BusinessException("Ce compte est désactivé.");
+            throw new BusinessException("Ce compte est désactivé, veuillez contacter l'équipe MediSync.");
         }
         if (!Boolean.TRUE.equals(user.getEmailVerified())) {
             throw new BusinessException("Veuillez vérifier votre adresse email avant de vous connecter (consultez votre boîte de réception).");
