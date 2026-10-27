@@ -68,6 +68,7 @@ public class DelegueServiceImpl implements DelegueService {
                 .role(RoleEnum.DELEGUE)
                 .mustChangePassword(false)
                 .emailVerified(false)
+                .isActive(false)
                 .build();
         User savedUser = userService.save(user);
 
@@ -82,7 +83,7 @@ public class DelegueServiceImpl implements DelegueService {
 
         Delegue saved = delegueRepository.save(delegue);
         emailVerificationService.genererEtEnvoyer(savedUser);
-        log.info("[Profils] Auto-inscription délégué {} — en attente de vérification email.", saved.getId());
+        log.info("[Profils] Auto-inscription délégué {} — compte désactivé, en attente d'activation admin.", saved.getId());
         return saved;
     }
 
@@ -137,6 +138,19 @@ public class DelegueServiceImpl implements DelegueService {
     }
 
     @Override
+    @Transactional
+    public Delegue activerParAdmin(String delegueId, String laboratoireId) {
+        Delegue delegue = getById(delegueId);
+        delegue.setLaboratoire(laboratoireService.getById(laboratoireId));
+        delegue.setLaboName(null);
+        User user = delegue.getUser();
+        user.setIsActive(true);
+        userService.save(user);
+        log.info("[Profils] Délégué {} activé par admin et associé au laboratoire {}.", delegueId, laboratoireId);
+        return delegueRepository.save(delegue);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public Delegue getById(String id) {
         return delegueRepository.findById(id)
@@ -164,11 +178,15 @@ public class DelegueServiceImpl implements DelegueService {
 
     @Override
     @Transactional
-    public Delegue update(String id, String nom, String prenom, String telephone) {
+    public Delegue update(String id, String nom, String prenom, String telephone, String laboratoireId) {
         Delegue delegue = getById(id);
         if (nom       != null) delegue.setNom(nom);
         if (prenom    != null) delegue.setPrenom(prenom);
         if (telephone != null) delegue.setTelephone(telephone);
+        if (laboratoireId != null) {
+            delegue.setLaboratoire(laboratoireService.getById(laboratoireId));
+            delegue.setLaboName(null);
+        }
         return delegueRepository.save(delegue);
     }
 

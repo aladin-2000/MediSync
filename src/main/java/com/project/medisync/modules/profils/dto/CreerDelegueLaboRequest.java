@@ -31,4 +31,6 @@ public class CreerDelegueLaboRequest {
     private String prenom;
 
     private String telephone;
+
+    private String laboratoireId;
 }

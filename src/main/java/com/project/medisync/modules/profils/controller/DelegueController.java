@@ -19,6 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Contrôleur REST gérant les opérations CRUD sur les profils des Délégués Médicaux
@@ -65,12 +66,31 @@ public class DelegueController {
     }
 
     /**
+     * Admin : crée en un seul appel le compte (email + mot de passe) et le profil délégué,
+     * rattaché au laboratoire choisi par l'admin. Le compte est actif par défaut.
+     */
+    @PostMapping("/admin-creer")
+    public ResponseEntity<ApiResponse<DelegueResponse>> adminCreerDelegue(
+            @Valid @RequestBody CreerDelegueLaboRequest req) {
+        if (req.getLaboratoireId() == null || req.getLaboratoireId().isBlank()) {
+            throw new BusinessException("Le laboratoire est obligatoire.");
+        }
+        var delegue = delegueService.creerDelegueComplet(
+                req.getEmail(), req.getPassword(), req.getNom(), req.getPrenom(),
+                req.getTelephone(), req.getLaboratoireId());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.ok("Compte délégué créé avec succès.", DelegueResponse.from(delegue)));
+    }
+
+    /**
      * Laboratoire : désactive un délégué de son propre laboratoire (ex: démission) —
      * il ne peut plus se connecter à son espace.
      */
     @PatchMapping("/{id}/desactiver")
     public ResponseEntity<ApiResponse<DelegueResponse>> desactiver(Authentication auth, @PathVariable String id) {
-        verifierAppartientAuLaboratoire(auth, id);
+        if (auth.getAuthorities().stream().noneMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+            verifierAppartientAuLaboratoire(auth, id);
+        }
         var delegue = delegueService.desactiver(id);
         return ResponseEntity.ok(ApiResponse.ok("Délégué désactivé.", DelegueResponse.from(delegue)));
     }
@@ -80,9 +100,27 @@ public class DelegueController {
      */
     @PatchMapping("/{id}/activer")
     public ResponseEntity<ApiResponse<DelegueResponse>> activer(Authentication auth, @PathVariable String id) {
-        verifierAppartientAuLaboratoire(auth, id);
+        if (auth.getAuthorities().stream().noneMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+            verifierAppartientAuLaboratoire(auth, id);
+        }
         var delegue = delegueService.activer(id);
         return ResponseEntity.ok(ApiResponse.ok("Délégué réactivé.", DelegueResponse.from(delegue)));
+    }
+
+    /**
+     * Admin : active un délégué auto-inscrit et l'associe à un laboratoire existant.
+     * Met laboName à null et laboratoireId à la valeur choisie.
+     */
+    @PatchMapping("/{id}/admin-activer")
+    public ResponseEntity<ApiResponse<DelegueResponse>> activerParAdmin(
+            @PathVariable String id,
+            @RequestBody Map<String, String> body) {
+        String laboratoireId = body.get("laboratoireId");
+        if (laboratoireId == null || laboratoireId.isBlank()) {
+            throw new BusinessException("Le laboratoire est obligatoire.");
+        }
+        var delegue = delegueService.activerParAdmin(id, laboratoireId);
+        return ResponseEntity.ok(ApiResponse.ok("Délégué activé et associé au laboratoire.", DelegueResponse.from(delegue)));
     }
 
     /** Empêche un laboratoire d'agir sur un délégué qui ne lui appartient pas. */
@@ -166,7 +204,7 @@ public class DelegueController {
     public ResponseEntity<ApiResponse<DelegueResponse>> update(
             @PathVariable String id,
             @Valid @RequestBody CreateDelegueRequest req) {
-        var delegue = delegueService.update(id, req.getNom(), req.getPrenom(), req.getTelephone());
+        var delegue = delegueService.update(id, req.getNom(), req.getPrenom(), req.getTelephone(), req.getLaboratoireId());
         return ResponseEntity.ok(ApiResponse.ok("Profil délégué mis à jour.", DelegueResponse.from(delegue)));
     }
 
@@ -183,7 +221,7 @@ public class DelegueController {
             Authentication auth,
             @Valid @RequestBody UpdateDelegueRequest req) {
         var delegueActuel = delegueService.getByUserId(auth.getName());
-        var delegue = delegueService.update(delegueActuel.getId(), req.getNom(), req.getPrenom(), req.getTelephone());
+        var delegue = delegueService.update(delegueActuel.getId(), req.getNom(), req.getPrenom(), req.getTelephone(), null);
         return ResponseEntity.ok(ApiResponse.ok("Profil mis à jour.", DelegueResponse.from(delegue)));
     }
 

@@ -87,10 +87,14 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/medecins/**").hasRole("ADMIN")
                         .requestMatchers("/users/**").hasRole("ADMIN")
 
+                        // Admin : création et activation de délégués
+                        .requestMatchers(HttpMethod.POST, "/api/delegues/admin-creer").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/delegues/*/admin-activer").hasRole("ADMIN")
+
                         // Espace laboratoire : gestion de ses propres délégués
                         .requestMatchers(HttpMethod.POST, "/api/delegues/creer-delegue-complet").hasRole("LABO")
-                        .requestMatchers(HttpMethod.PATCH, "/api/delegues/*/desactiver").hasRole("LABO")
-                        .requestMatchers(HttpMethod.PATCH, "/api/delegues/*/activer").hasRole("LABO")
+                        .requestMatchers(HttpMethod.PATCH, "/api/delegues/*/desactiver").hasAnyRole("ADMIN", "LABO")
+                        .requestMatchers(HttpMethod.PATCH, "/api/delegues/*/activer").hasAnyRole("ADMIN", "LABO")
 
                         // Rendez-vous — réservé au délégué, sauf consultation côté médecin/laboratoire et confirmation/annulation côté médecin
                         .requestMatchers(HttpMethod.GET, "/api/rendezvous/conflits").hasRole("ADMIN")

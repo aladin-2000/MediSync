@@ -32,6 +32,9 @@ public interface DelegueService {
     /** Réactive le compte du délégué. */
     Delegue activer(String id);
 
+    /** Admin : active le compte du délégué et l'associe à un laboratoire existant. */
+    Delegue activerParAdmin(String delegueId, String laboratoireId);
+
     Delegue getById(String id);
 
     /** Récupère le profil délégué associé à un compte utilisateur. */
@@ -41,7 +44,7 @@ public interface DelegueService {
 
     List<Delegue> getByLaboratoire(String laboratoireId);
 
-    Delegue update(String id, String nom, String prenom, String telephone);
+    Delegue update(String id, String nom, String prenom, String telephone, String laboratoireId);
 
     void updateScoreFiabilite(String id, Float nouveauScore);
 
