@@ -103,10 +103,6 @@ public class AuthController {
 
         User user = userService.getById(authentication.getName());
 
-        if (!passwordEncoder.matches(req.getCurrentPassword(), user.getPasswordHash())) {
-            throw new BusinessException("Mot de passe actuel incorrect.");
-        }
-
         user.setPasswordHash(passwordEncoder.encode(req.getNewPassword()));
         user.setMustChangePassword(false);
         userService.save(user);
