@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -131,10 +132,23 @@ public class LaboratoireServiceImpl implements LaboratoireService {
     @Transactional
     public Laboratoire activer(String id) {
         Laboratoire labo = getById(id);
+        labo.setStatutAbonnement(StatutAbonnementEnum.ACTIF);
         User user = labo.getUser();
         user.setIsActive(true);
         userService.save(user);
-        log.info("[Profils] Laboratoire {} réactivé.", id);
+        List<Delegue> delegues = delegueRepository.findByLaboratoireId(id);
+        List<User> usersToActivate = new ArrayList<>();
+        for (Delegue delegue : delegues) {
+            User delegueUser = delegue.getUser();
+            if (Boolean.FALSE.equals(delegueUser.getIsActive())) {
+                delegueUser.setIsActive(true);
+                usersToActivate.add(delegueUser);
+            }
+        }
+        if (!usersToActivate.isEmpty()) {
+            userService.saveAll(usersToActivate);
+        }
+        log.info("[Profils] Laboratoire {} réactivé, ainsi que ses {} délégué(s).", id, delegues.size());
         return labo;
     }
 
@@ -142,17 +156,22 @@ public class LaboratoireServiceImpl implements LaboratoireService {
     @Transactional
     public Laboratoire desactiver(String id) {
         Laboratoire labo = getById(id);
+        labo.setStatutAbonnement(StatutAbonnementEnum.SUSPENDU);
         User user = labo.getUser();
         user.setIsActive(false);
         userService.save(user);
 
         List<Delegue> delegues = delegueRepository.findByLaboratoireId(id);
+        List<User> usersToDeactivate = new ArrayList<>();
         for (Delegue delegue : delegues) {
             User delegueUser = delegue.getUser();
             if (Boolean.TRUE.equals(delegueUser.getIsActive())) {
                 delegueUser.setIsActive(false);
-                userService.save(delegueUser);
+                usersToDeactivate.add(delegueUser);
             }
+        }
+        if (!usersToDeactivate.isEmpty()) {
+            userService.saveAll(usersToDeactivate);
         }
         log.info("[Profils] Laboratoire {} désactivé, ainsi que ses {} délégué(s).", id, delegues.size());
         return labo;
@@ -194,6 +213,9 @@ public class LaboratoireServiceImpl implements LaboratoireService {
                 throw new BusinessException("La date de fin doit être postérieure à la date de début.");
             }
             labo.setDateFinAbonnement(dateFin);
+        }
+        if(labo.getStatutAbonnement().equals(StatutAbonnementEnum.SUSPENDU)){
+            this.desactiver(id);
         }
         return laboratoireRepository.save(labo);
     }

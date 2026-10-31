@@ -6,6 +6,8 @@ import com.project.medisync.modules.auth.repository.UserRepository;
 import com.project.medisync.modules.auth.service.UserService;
 import com.project.medisync.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -37,6 +39,12 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public User save(User user) {
         return userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public List<User> saveAll(List<User> users) {
+        return userRepository.saveAll(users);
     }
 
     @Override
