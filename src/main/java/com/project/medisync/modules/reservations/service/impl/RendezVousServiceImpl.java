@@ -64,7 +64,11 @@ public class RendezVousServiceImpl implements RendezVousService {
                 .build();
 
         creneauService.marquerReserve(creneauId);
-        return rendezVousRepository.save(rdv);
+        RendezVous saved = rendezVousRepository.save(rdv);
+        notifierMedecin(saved, TypeNotificationEnum.RESERVATION,
+                "Le délégué " + nomDelegue(saved) + " a réservé un rendez-vous avec vous le "
+                        + creneauLabel(saved) + ".");
+        return saved;
     }
 
     @Override
