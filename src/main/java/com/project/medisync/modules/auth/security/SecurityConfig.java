@@ -107,6 +107,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/rendezvous/delegue/**").hasAnyRole("DELEGUE", "LABO")
                         .requestMatchers("/api/rendezvous/**").hasRole("DELEGUE")
 
+                        // To test the health of the backend
+                        .requestMatchers(HttpMethod.GET, "/health").permitAll()
+
+
                         // Tout le reste : il faut juste être connecté
                         .anyRequest().authenticated()
                 )
