@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * Crée 5 comptes Médecin de test au démarrage de l'application, s'ils n'existent pas encore.
+ * Crée 2 comptes Médecin de test au démarrage de l'application, s'ils n'existent pas encore.
  * Permet de tester l'app immédiatement sans passer par les 2 appels API (création du user + du profil médecin).
  *
  * Ne fait rien si TEST_MEDECIN_PASSWORD n'est pas défini (comportement par défaut,
@@ -47,16 +47,10 @@ public class TestMedecinBootstrap implements ApplicationRunner {
                                 String regionNom) {}
 
     private static final List<MedecinSeed> MEDECINS = List.of(
-            new MedecinSeed("ahmed.bensalah@medisync.tn", "Ben Salah", "Ahmed", SpecialiteEnum.CARDIOLOGIE,
+            new MedecinSeed("testmedecin1@medisync.tn", "Medecin1", "Test", SpecialiteEnum.CARDIOLOGIE,
                     "12 Avenue Habib Bourguiba, Tunis", "+216 71 200 101", 36.8065, 10.1815, "Tunis"),
-            new MedecinSeed("amina.trabelsi@medisync.tn", "Trabelsi", "Amina", SpecialiteEnum.DERMATOLOGIE,
-                    "5 Rue de Marseille, Tunis", "+216 71 200 102", 36.8000, 10.1800, "Tunis"),
-            new MedecinSeed("karim.bouzid@medisync.tn", "Bouzid", "Karim", SpecialiteEnum.PEDIATRIE,
-                    "18 Avenue Mohamed V, Sfax", "+216 74 200 103", 34.7406, 10.7603, "Sfax"),
-            new MedecinSeed("sonia.gharbi@medisync.tn", "Gharbi", "Sonia", SpecialiteEnum.GYNECOLOGIE,
-                    "7 Rue Ibn Khaldoun, Sousse", "+216 73 200 104", 35.8256, 10.6084, "Sousse"),
-            new MedecinSeed("yassine.chaabane@medisync.tn", "Chaabane", "Yassine", SpecialiteEnum.MEDECINE_GENERALE,
-                    "22 Avenue de la République, Ariana", "+216 71 200 105", 36.8625, 10.1956, "Ariana")
+            new MedecinSeed("testmedecin2@medisync.tn", "Medecin2", "Test", SpecialiteEnum.DERMATOLOGIE,
+                    "5 Rue de Marseille, Tunis", "+216 71 200 102", 36.8000, 10.1800, "Tunis")
     );
 
     @Override

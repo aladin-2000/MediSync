@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * Crée 5 comptes Délégué de test au démarrage de l'application, s'ils n'existent pas encore.
+ * Crée 2 comptes Délégué de test au démarrage de l'application, s'ils n'existent pas encore.
  * Permet de tester l'app immédiatement sans passer par les 2 appels API (création du user + du profil délégué).
  *
  * Ne fait rien si TEST_DELEGUE_PASSWORD n'est pas défini (comportement par défaut,
@@ -37,11 +37,8 @@ public class TestDelegueBootstrap implements ApplicationRunner {
     private record DelegueSeed(String email, String nom, String prenom, String telephone) {}
 
     private static final List<DelegueSeed> DELEGUES = List.of(
-            new DelegueSeed("mehdi.larbi@medisync.tn", "Larbi", "Mehdi", "+216 22 300 201"),
-            new DelegueSeed("sarra.jendoubi@medisync.tn", "Jendoubi", "Sarra", "+216 22 300 202"),
-            new DelegueSeed("wassim.khemiri@medisync.tn", "Khemiri", "Wassim", "+216 22 300 203"),
-            new DelegueSeed("nour.ayari@medisync.tn", "Ayari", "Nour", "+216 22 300 204"),
-            new DelegueSeed("rania.fekih@medisync.tn", "Fekih", "Rania", "+216 22 300 205")
+            new DelegueSeed("testdelegue1@medisync.tn", "Delegue1", "Test", "+216 22 300 201"),
+            new DelegueSeed("testdelegue2@medisync.tn", "Delegue2", "Test", "+216 22 300 202")
     );
 
     @Override
